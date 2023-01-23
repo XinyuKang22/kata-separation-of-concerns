@@ -1,0 +1,48 @@
+Resources:
+  ScannedEvidenceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "${self:custom.uploadParameters.scannedBucketName}"
+      AccessControl: Private
+
+  ScannedEvidenceBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref 'ScannedEvidenceBucket'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - s3:GetObject
+              - s3:PutObject
+            Effect: Allow
+            Resource: "arn:aws:s3:::${self:custom.uploadParameters.scannedBucketName}/*"
+            Principal:
+              AWS: !GetAtt EKSNodeInstanceRole.Arn
+
+  QuarantinedEvidenceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "${self:custom.uploadParameters.quarantinedBucketName}"
+      AccessControl: Private
+
+  QuarantinedEvidenceBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref 'QuarantinedEvidenceBucket'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - s3:GetObject
+              - s3:PutObject
+            Effect: Allow
+            Resource: "arn:aws:s3:::${self:custom.uploadParameters.quarantinedBucketName}/*"
+            Principal:
+              AWS: !GetAtt EKSNodeInstanceRole.Arn
+
+  TerraformBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "${self:custom.uploadParameters.terraformBucketName}"
+      AccessControl: Private

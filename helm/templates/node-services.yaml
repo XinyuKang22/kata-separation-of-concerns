@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-handler
+  labels:
+    app: file-handler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-handler
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: file-handler
+    spec:
+      containers:
+        - name: file-handler
+          image: {{ .Values.dockerImageRegistry }}/file-handler:{{ .Values.dockerImageVersion }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 4002
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              port: http
+              path: hc
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          env:
+            - name: AWS_DEFAULT_REGION
+              value: {{ .Values.awsRegion }}
+            - name: PRODUCTION_DEPLOYMENT
+              value: '{{ .Values.production }}'
+            - name: SCANNED_BUCKET
+              value: scanned-evidence-{{ .Values.subdomain }}
+            - name: QUARANTINE_BUCKET
+              value: quarantined-evidence-{{ .Values.subdomain }}
+            - name: MAXIMUM_FILE_UPLOAD_SIZE
+              value: {{ .Values.maximumUploadSize }}
+          volumeMounts:
+            - mountPath: /evidence
+              name: evidence-volume
+      volumes:
+        - name: evidence-volume
+          emptyDir: { }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-handler
+spec:
+  selector:
+    app: file-handler
+  ports:
+    - protocol: TCP
+      port: 4002
+      targetPort: 4002
+
+---

@@ -1,0 +1,8 @@
+production: false
+subdomain: localhost
+dockerImageRegistry: library
+dockerImageVersion: latest
+awsRegion: ap-southeast-2
+maximumUploadSize: "\"26214400\""
+oktaOrgUrl: https://live-nonprod-esgtech-co.oktapreview.com/
+oktaUserManagementClientId: 0oa4v4g7deYLXdzpG1d7

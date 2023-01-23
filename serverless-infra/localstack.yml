@@ -1,0 +1,29 @@
+service: core-infra
+
+plugins:
+  - serverless-localstack
+provider:
+  name: aws
+  region: "ap-southeast-2"
+  runtime: nodejs16.x
+  stage: "local"
+
+custom:
+  localstack:
+    stages:
+      - local
+    host: http://localhost
+    edgePort: 4566
+    autostart: false
+  
+  eksParameters:
+    clusterName: "eks-cluster"
+
+  uploadParameters:
+    scannedBucketName: scanned-evidence-localhost
+    quarantinedBucketName: quarantined-evidence-localhost
+
+# All resources should be in files to prevent issues
+# See: https://stackoverflow.com/a/47867243/1153203
+resources:
+  - ${file(resources/s3-buckets.yml)}

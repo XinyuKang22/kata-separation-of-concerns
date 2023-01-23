@@ -1,0 +1,10 @@
+/hasura/liquibase/changelog/databasechangelog.csv
+/hasura/liquibase/changelog/liquibase.properties
+.envrc
+.idea/
+.vscode
+
+node_modules
+node-services/*/dist
+.DS_Store
+coverage/
