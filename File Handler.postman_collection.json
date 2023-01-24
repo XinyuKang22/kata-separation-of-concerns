@@ -1,0 +1,77 @@
+{
+	"info": {
+		"_postman_id": "91cd9a5c-032c-4dca-a432-f52d2f313d66",
+		"name": "File Handler",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Upload file",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"action\": {\n        \"name\": \"upload\"\n    },\n    \"input\": {\n        \"data\": {\n            \"filename\": \"a_test_file.zip\",\n            \"base64_data\": \"abc\",\n            \"name\": \"A Test File\",\n            \"description\": \"User supplied description\"\n        }\n    }\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4002/upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4002",
+					"path": [
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get evidence",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"action\": {\n        \"name\": \"upload\"\n    },\n    \"input\": {\n        \"data\": {\n            \"filename\": \"a_test_file.zip\",\n            \"base64_data\": \"abc\",\n            \"name\": \"A Test File\",\n            \"description\": \"User supplied description\"\n        }\n    }\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4002/evidence/63cf4d4300e19e92608812c1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4002",
+					"path": [
+						"evidence",
+						"63cf4d4300e19e92608812c1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

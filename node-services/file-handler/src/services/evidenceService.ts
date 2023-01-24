@@ -1,11 +1,10 @@
 import { Readable } from "stream";
 import { v4 as uuidv4 } from "uuid";
 import http from "http";
-import { createEvidence, } from "../data/evidenceDao";
 import { FastifyBaseLogger } from "fastify";
 import { uploadFileToS3 } from ".";
 import { UploadRequest } from "../types";
-import { Errors, isErrors } from ".";
+import { Errors } from ".";
 import NodeClam from "clamscan";
 import { MongoClient, ObjectId } from "mongodb";
 
