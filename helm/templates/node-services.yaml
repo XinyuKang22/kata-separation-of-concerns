@@ -41,12 +41,14 @@ spec:
               value: quarantined-evidence-{{ .Values.subdomain }}
             - name: MAXIMUM_FILE_UPLOAD_SIZE
               value: {{ .Values.maximumUploadSize }}
-          volumeMounts:
-            - mountPath: /evidence
-              name: evidence-volume
-      volumes:
-        - name: evidence-volume
-          emptyDir: { }
+            - name: CLAMAV_HOST
+              value: clamav
+            - name: CLAMAV_PORT
+              value: "3310"
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: password123
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: adminuser
 ---
 apiVersion: v1
 kind: Service

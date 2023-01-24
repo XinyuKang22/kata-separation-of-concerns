@@ -32,6 +32,9 @@ def microservice_docker_build(name):
 yaml = helm('./helm')
 k8s_yaml(yaml)
 
+# Mongo
+k8s_resource(workload='mongo', port_forwards=27017, labels=["infra"])
+
 # Localstack (local s3 instance)
 k8s_resource(workload='localstack', port_forwards=4566, labels=["infra"])
 

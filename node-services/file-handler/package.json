@@ -7,7 +7,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./dist/index.js",
-    "run": "ts-node --transpile-only ./src/index.ts",
+    "run": "nodemon ./src/index.ts",
     "test": "jest",
     "type-check": "type-coverage --strict --detail --ignore-files '**/*.test.ts*' --ignore-files 'src/generated/*'",
     "lint": "eslint --report-unused-disable-directives .",
@@ -23,6 +23,7 @@
     "envalid": "^7.3.1",
     "fastify": "^4.1.0",
     "graphql": "^16.5.0",
+    "mongodb": "^4.13.0",
     "typescript": "^4.7.4",
     "uuid": "^8.3.2",
     "zod": "^3.17.3"
@@ -43,11 +44,18 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-sonarjs": "^0.15.0",
     "jest": "^28.1.3",
+    "nodemon": "^2.0.20",
     "prettier": "^2.6.2",
     "ts-node": "^10.9.1",
     "type-coverage": "^2.21.1",
     "typescript-coverage-report": "^0.6.4",
     "yarn-or-npm": "^3.0.1"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/test.ts"
+    ],
+    "delay": 500
   },
   "typeCoverage": {
     "atLeast": 100,

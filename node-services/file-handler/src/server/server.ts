@@ -3,11 +3,9 @@ import Fastify, {
   FastifyReply,
   FastifyRequest,
 } from "fastify";
-import {
-  parseUploadRequestBody,
-} from "../services/codecs";
 import { isErrors } from "../services";
 import { EvidenceService } from "../services";
+import { UploadRequest } from "../types";
 
 export const buildFastifyServer = (
   maximum_upload_size: number,
@@ -46,19 +44,13 @@ export const buildFastifyServer = (
       request: FastifyRequest,
       reply: FastifyReply
     ): Promise<
-      | {
-          evidence_id: string;
-        }
+      {
+        evidence_id: string;
+      }
       | undefined
     > => {
 
-      const sendErrorReply_ = sendErrorReply(reply);
-      const requestBody = parseUploadRequestBody(request);
-
-      if (isErrors(requestBody)) {
-        await sendErrorReply_(requestBody.errors.join(" "));
-        return;
-      }
+      const requestBody = request as UploadRequest;
 
       const processResult = await evidenceService.fileUpload(
         requestBody.body.input.data,
@@ -67,12 +59,21 @@ export const buildFastifyServer = (
       );
 
       if (isErrors(processResult)) {
-        await sendErrorReply_(processResult.errors.join(" "));
+        await sendErrorReply(reply)(processResult.errors.join(" "));
         return;
       }
+
       return processResult;
     }
   );
+
+  fastify.get(
+    "/evidence/:evidenceId", async (request, reply) => {
+      const { evidenceId } = request.params as { evidenceId: string};
+
+      return await evidenceService.fetchDetails(evidenceId);
+    }
+  )
 
   return fastify;
 };
