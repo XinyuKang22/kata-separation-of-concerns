@@ -1,9 +1,10 @@
 # Error Handling
 
-Another responsibility that is not performed well is:
+Another two responsibilities not performed well are:
 
 | What                     | Where      | When |
 | ---- | --- | --- |
+| Parse incoming request from HTTP to domain-specific type | Route Handler (`server.ts`) | Usage |
 | Translate domain-specific response to HTTP response | Route Handler | Usage |
 
 This is partly because the two service methods that are  called by the Route Handler (`EvidenceService+uploadFile` and `+fetchDetails`) don't provide the necessary domain specific information for the Route Handler to return good information to the caller.
@@ -71,7 +72,7 @@ await reply.status(404).send({
 })
 ```
 
-Call the service again?
+Call the service again.
 
 2. What status code is returned?
 3. Is that status code appropriate for given the request that was made?
@@ -144,7 +145,7 @@ Modify your POST request and remove the `base64_content` property.
 3. What response body was returned?
 4. Do you think that response body is appropriate?
 
-The type that we use that request body is named `UploadRequest` and is defined in `upload.ts`. `UploadRequest` says that `base64_body` is mandatory and can not be undefined.
+The type that we use for that request is named `UploadRequest` and is defined in `node-services/file-handler/src/types/upload.ts`. `UploadRequest` says that `base64_body` is mandatory and can not be undefined.
 
 5. What part of the server is responsible for converting the HTTP request into an `UploadRequest`?
 6. Is it doing a good job?
@@ -190,20 +191,20 @@ export type UploadRequest = z.infer<typeof UploadRequestSchema>;
 
 Now, we have to use that new schema to parse our request[^1].
 
-Change the POST handler to *not* use as:
+Change the POST handler to *not* use `as` and instead:
 
 ```typescript
 const uploadRequest = UploadRequestSchema.parse(request);
 ```
 
-And send a your bad request.
+And send your bad request.
 
 7. Are we getting better error messages from the server?
 8. Remove another required property. Do you get information about both missing fields in the response?
 
-You'll note that the status is still inappropriate. When a caller supplies bad data, the server should return a 400 status.
+You'll note that the status is still inappropriate. When a caller supplies bad data, the server should return a `400` status.
 
-This is because `parse` (although it faithfully returns the type that it does), can also throw an error. We could catch that error, but it is preferable to use methods don't have holes in their types.
+This is because `parse` (although it faithfully returns the type that it says it does) can also throw an error. We *could* catch that error, but it is preferable to use methods don't have holes in their types.
 
 Switch the Route handler to use the method that will parse safely.
 
@@ -213,7 +214,7 @@ const uploadRequest = UploadRequestSchema.safeParse(request);
 
 Your code should have errors now, because the type of `safeParse` has changed.
 
-Add the code to handle the error case and allow TypeScripts flow typing to narrow the type down to the success case:
+Add the code to handle the error case and allow TypeScript's flow typing to narrow the type down to the success case:
 
 ```typescript
 const uploadRequest = UploadRequestSchema.safeParse(request);
@@ -241,5 +242,9 @@ We've touched on two responsibilities in this section:
 | Translate domain-specific response to HTTP response | Route Handler | Usage |
 
 and significantly improved the behaviour of both.
+
+* We return appropriate statuses ✅.
+* We return useful responses for both internal and user errors ✅.
+* We haven't found a need to use non-standard response headers 🤔.
 
 [^1]: Remember to [parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/).
