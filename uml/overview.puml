@@ -1,0 +1,33 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+HIDE_STEREOTYPE()
+
+Person(alice, "Alice")
+
+Container(client, "HTTP Client", "", "")
+
+System_Boundary(c1, "Kubernetes"){
+    Container(api, "File Handler", "NodeJS", "")
+
+    Container(db, "Database", "MongoDB")
+
+    Container(s3, "Bulk Storage", "LocalStack S3")
+
+    Container(clamav, "Virus Scanner", "clamav")
+}
+
+Rel_R(alice, client, "Uses", "")
+
+Rel_R(client, api, "Upload/Metadata Read", "HTTP")
+
+Rel_R(api, db, "Reads/Writes", "MongoDB Wire Protocol")
+
+Rel_R(api, clamav, "Scan Requests / Results", "ClamAV Protocol")
+
+Rel_R(api, s3, "Store Scanned Content", "AWS S3 API")
+
+Lay_D(s3, clamav)
+
+Lay_D(clamav, db)
+@enduml
