@@ -56,11 +56,11 @@ Moving to the Route Handler, let's use the response from `+fetchDetails` to chan
 Firstly, let's get the machinery in place. Change the guts of the GET handler to:
 
 ```typescript
-      const maybeMetaData = await evidenceService.fetchDetails(evidenceId);
+      const result = await evidenceService.fetchDetails(evidenceId);
 
-      return maybeMetaData === null ?
-        maybeMetaData :
-        maybeMetaData;
+      return result === null ?
+        result :
+        result;
 ```
 
 Then change the `null` branch to return a 404 response with a helpful error message:
@@ -78,18 +78,19 @@ Call the service again?
 4. What response body was returned?
 5. Do you think that response body is appropriate?
 
-## Handling errors
-Send a request for an invalid id (i.e. one shorter than 24 digits long - `asdf` will work).
+## Handling internal errors
+Change the servers configuration so that the username is invalid and then attempt to fetch some details.
 
-You'll get a `500` response code. This isn't appropriate given that the error is caused by our bad input. A `400` is more appropriate.
+You should get a `500` response code.
 
-Since this is a convenient way to cause a failure, we are going to leave it in place for now.
+1. What response body was returned?
+2. Do you think that response body is appropriate?
 
 We mentioned before that throwing an error (e.g. `throw new Error('something failed')`) does not show up in the type system. This is not true for functions and methods that return a `Promise`. Promises do model success and failure.
 
-1. What part of our implementation causes the 'failed' Promise to turn into a thrown Error?
-2. What part of the system is handling that error at the moment? Is it code that we have written?
-3. Are we logging anything when the error occurs? Does it have helpful context?
+3. What part of our implementation causes the 'failed' Promise to turn into a thrown Error?
+4. What part of the system is handling that error at the moment? Is it code that we have written?
+5. Are we logging anything when the error occurs? Does it have helpful context?
 
 Right now the error is bubbling up from the internals of mongo's client library. This means that:
 * mongo internals are leaking to callers
@@ -110,4 +111,45 @@ if (processResult instanceof Error) {
 }
 ```
 
-Let's follow a similar pattern here.
+Let's follow a similar pattern here. Change the type of `EvidenceService+fetchDetails` to `Promise<unknown | null | Error>`.
+
+Then wrap the part of that method that invokes the `MetadataService` with:
+
+```typescript
+    try {
+      return ... // <-- Code to invoke the MetadataService goes here.
+    } catch (e: unknown) {
+      return new Error(`Failed to fetch details of [${evidenceId}].`, 
+        { cause: chainableError(e) }
+      );
+    } 
+```
+
+then make the request again.
+
+Send the request again and check the message in the response body.
+
+1. What was the message?
+2. Where can you see the `cause` of the error?
+3. Do you think that 'wrapping' the original error in this way provides additional, useful context?
+
+Fix the servers configuration and verify that everything works again.
+
+## Handling user errors
+
+Modify your POST request and remove the `base64_content` property.
+
+1. What status code is returned?
+2. Is that status code appropriate for given the request that was made?
+3. What response body was returned?
+4. Do you think that response body is appropriate?
+
+The type that we use that request body is named `UploadRequest` and is defined in `upload.ts`. `UploadRequest` says that `base64_body` is mandatory and can not be undefined.
+
+5. What part of the server is responsible for converting the HTTP request into an `UploadRequest`?
+6. Is it doing a good job?
+
+Let's think about what we would out of a good translation between the HTTP request and the domain-specific types.
+
+* Good error messages to help us develop and operate.
+* Truthful types (e.g. not using `as`).

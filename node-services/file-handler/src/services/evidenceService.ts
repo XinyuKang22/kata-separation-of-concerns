@@ -2,7 +2,7 @@ import { Readable } from "stream";
 import { v4 as uuidv4 } from "uuid";
 import http from "http";
 import { FastifyBaseLogger } from "fastify";
-import { uploadFileToS3 } from ".";
+import { chainableError, uploadFileToS3 } from ".";
 import { UploadRequest } from "../types";
 import NodeClam from "clamscan";
 import { MongoClient, ObjectId } from "mongodb";
