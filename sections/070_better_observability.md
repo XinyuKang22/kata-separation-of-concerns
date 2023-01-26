@@ -127,14 +127,14 @@ import metricsPlugin from "fastify-metrics";
 Then change how we build the Fastify instance to add the metrics plugin:
 
 ```typescript
-  const fastify = Fastify({
+  const fastify = await Fastify({
     ...
   });
   
   await fastify.register(metricsPlugin); // <-- Add this line.
 ```
 
-Wait for the service to be updated then make a `GET` request to the metrics endpoint (hint: check the fastify-metrics documentation for the default endpoint).
+Wait for the service to be updated then make a `GET` request to the metrics endpoint (hint: check the fastify-metrics documentation for the default path).
 
 1. What metric(s) tells you the number of `GET` requests made?
 
@@ -171,6 +171,8 @@ Check the metrics page to validate that you can see the `clean_files_count` metr
 Make a few `POST` requests to scan content.
 
 1. Why isn't the counter being incremented?
+
+### Wiring up the metric
 
 We now have to decide how that counter will be incremented. We have a couple of options:
 
