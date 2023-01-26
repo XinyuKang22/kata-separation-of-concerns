@@ -6,7 +6,7 @@ Another responsibility that is not performed well is:
 | ---- | --- | --- |
 | Translate domain-specific response to HTTP response | Route Handler | Usage |
 
-This is mostly because the two service methods that are  called by the Route Handler (`EvidenceService+uploadFile` and `+fetchDetails`) don't provide the necessary domain specific information for the Route Handler to return good information to the caller.
+This is partly because the two service methods that are  called by the Route Handler (`EvidenceService+uploadFile` and `+fetchDetails`) don't provide the necessary domain specific information for the Route Handler to return good information to the caller.
 
 Before we start improving our implementation, let's first consider whether it is appropriate for the Route Handler to translate from the domain-specific response to a HTTP one (and for the `EvidenceService` to be unaware of HTTP).
 
