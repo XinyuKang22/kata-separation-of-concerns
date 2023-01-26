@@ -7,7 +7,7 @@ Right now, we can really only observe the solution in two ways:
 * looking at the logs
 * sending requests and looking at responses
 
-Neither of these approaches provides useful information. The implementation only logs minimal information about the request it is handling and what happened with it. Responses for bad requests are similarly pretty poor. We *have* improved observability related to configuration handling slightly.
+Currently, neither of these approaches provides useful information. The implementation only logs minimal information about the request it is handling and what happened with it. Responses for bad requests are similarly pretty poor. We *have* improved observability related to configuration handling slightly.
 
 1. Observability has a converse. What is it?
 2. How does our solution rate in that aspect?
