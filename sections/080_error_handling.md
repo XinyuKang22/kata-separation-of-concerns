@@ -246,5 +246,7 @@ and significantly improved the behaviour of both.
 * We return appropriate statuses ✅.
 * We return useful responses for both internal and user errors ✅.
 * We haven't found a need to use non-standard response headers 🤔.
+* We don't use `as`[^2] when processing incoming requests ✅.
 
 [^1]: Remember to [parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/).
+[^2]: Except in the GET handler that we didn't modify.
