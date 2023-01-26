@@ -21,7 +21,7 @@ The `EvidenceService` is doing a lot of work in our implementation at the moment
 
 | What                     | Where      | When |
 | ---- | --- | --- |
-| Read environment to set up dependencies | Assembler | Creation |
+| Read environment and parse configuration | Assembler | Creation |
 | Create `EvidenceService` | Assembler (top-level `index.ts`) | Creation |
 | Create routes            | Assembler | Creation |
 | Start server             | Assembler | Creation |
@@ -35,14 +35,19 @@ The `EvidenceService` is doing a lot of work in our implementation at the moment
 
 Not only is the `EvidenceService` doing the bulk of the work, but it is also tied to (and has intimate knowledge of) the current implementations for virus scanning, uploading content and storing (and reading) metadata.
 
-The refactoring that we did earlier gives us a clear picture of the 
+The refactoring that we did earlier gives us a clear picture of the internals of `EvidenceService+uploadFile`, so we can make informed decisions about how to split it apart.
 
-Let's split the EvidenceService into more pieces:
+On that basis, let's split the EvidenceService into more pieces:
 
-1. A `MetadataService` that provides methods to write and read metadata.
-2. A `VirusScanningService` that provide a method to scan content.
+* A `MetadataService` that provides methods to write and read metadata.
+* A `VirusScanningService` that provide a method to scan content.
 
-Let's also refactor `awsService.ts` to be a class that we can construct an instance of and pass into the `EvidenceService`.
+Let's also refactor `awsService.ts` to be a class that we can construct an instance of it.
+
+As we don't want `EvidenceService` to know the implementation details of these new services, we are going to instantiate them in the Assembler and pass them to the `EvidenceService` constructor.
+
+1. Do you agree that these new services should be created by the Assembler? When would you *not* want to do it this way?
+2. Is it reasonable to hide the implementation details of these services from the `EvidenceService`? What implementation details should you not try to hide?
 
 ## MetadataService
 
@@ -63,7 +68,7 @@ export class MetadataService {
 
 Then grab the functions that relate to handling metadata and convert them to methods of that class.
 
-You'll notice that those methods currently accept 'configuration' info (e.g. the mongodb username and password) in their parameters. That configuration is implementation specific and shouldn't be controlled by the caller - it should be provided by the "Assembler" when the MetadataService is instantiated.
+You'll notice that those methods currently accept 'configuration' info (e.g. the mongodb username and password) in their parameters. That configuration is implementation specific and shouldn't be controlled by the caller - it should be provided by the Assembler when the `MetadataService` is instantiated.
 
 // TODO add diagram with config at creation vs parameters at usage.
 
@@ -115,7 +120,7 @@ After this refactor the responsibilities are:
 
 | What                     | Where      | When |
 | ---- | --- | --- |
-| Read environment to set up dependencies | Assembler | Creation |
+| Read environment and parse configuration | Assembler | Creation |
 | Create services[^1] | Assembler (top-level `index.ts`) | Creation |
 | Create routes            | Assembler | Creation |
 | Start server             | Assembler | Creation |

@@ -4,7 +4,7 @@ Now that we can see more clearly what `EvidenceService+uploadFile` is doing, let
 
 Let's decide this by thinking about:
 
-* should the activity occur during creation of something (a class, service, etc) or when it is used (when invoking a method); and
+* whether the activity occur during creation of something (a class, service, etc) or when it is used (when invoking a method); and
 * what information should be hidden (and the contrary what should be visible) to other components.
 
 In particular, we want to avoid burdening clients (callers) of a function or method with having to provide too much information to get the output that they want. Likewise, we don't want to expose implementation specific information to callers.
