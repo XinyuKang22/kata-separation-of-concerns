@@ -13,7 +13,7 @@ Look in that Tiltfile and find the four major pieces:
 
 Tilt will build and run these pieces inside the Kubernetes cluster that you have configured.
 
-![](.generated-diagrams/overview.svg)
+![](../.generated-diagrams/overview.svg)
 
 ## Start Tilt
 
