@@ -2,6 +2,8 @@
 
 This kata walks the student through applying the principle of "Separation of Concerns" (along with other software engineering principles) to the creation of a simple NodeJS service.
 
+The student starts with a running - but extremely bad - implementation and refactors it, checking that the service continues to work along the way.
+
 # Pre-requisities
 
 1. [Docker](https://docs.docker.com/get-docker/)
