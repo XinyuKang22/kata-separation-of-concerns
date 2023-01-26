@@ -7,15 +7,22 @@ import { isErrors } from "../services";
 import { EvidenceService } from "../services";
 import { UploadRequest } from "../types";
 
-export const buildFastifyServer = (
-  maximum_upload_size: number,
-  evidenceService: EvidenceService
-): FastifyInstance => {
-  const fastify = Fastify({
+export const buildFastifyServer = async (
+  maximum_upload_size: number
+): Promise<FastifyInstance> => {
+  const fastify = await Fastify({
     logger: true,
     requestIdHeader: "x-request-id",
     bodyLimit: maximum_upload_size,
   });
+
+  return fastify;
+}
+
+export const buildFastifyRoutes = (
+  fastify: FastifyInstance,
+  evidenceService: EvidenceService
+) => {
 
   const logger = fastify.log;
 

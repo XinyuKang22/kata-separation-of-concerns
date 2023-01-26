@@ -108,6 +108,173 @@ Run the requests again and look at the log messages.
 
 ## Metrics
 
+To emit metrics, we will use [fastify-metrics](https://github.com/SkeLLLa/fastify-metrics).
 
+First, we have to add the new dependency:
 
-[^1]: *without* resorting to attaching a debugger.
+1. Change directories into `node-services/file-handler`.
+2. Use yarn to add the dependency `yarn add fastify-metrics`.
+3. Wait for the service to rebuild and restart.
+
+Now, let's edit `server.ts` to enable it.
+
+Add the import at the top of the file, along with the other imports:
+
+```typescript
+import metricsPlugin from "fastify-metrics";
+```
+
+Then change how we build the Fastify instance to add the metrics plugin:
+
+```typescript
+  const fastify = Fastify({
+    ...
+  });
+  
+  await fastify.register(metricsPlugin); // <-- Add this line.
+```
+
+Wait for the service to be updated then make a `GET` request to the metrics endpoint (hint: check the fastify-metrics documentation for the default endpoint).
+
+1. What metric(s) tells you the number of `GET` requests made?
+
+Make a few `POST` requests to scan some clean and infected content.
+
+2. What metric(s) tells you the number of `POST` requests made?
+3. Can you see any metrics for the individual requests?
+4. Can you see any metrics for how long it took to scan the content (vs the entire request duration)?
+5. What do the `le` attributes mean? How would they be used? What about `quantile`?
+
+### A custom metric
+
+Just turning on `fastify-metrics` gave us much better visibility into the behaviour of the service. We can assess activity (how many requests are being made and of what type), performance (how long it is taking to process requests) and some of the outcomes of those requests (using the status code attribute).
+
+It is often useful to include custom metrics, that provide additional insight into the behaviour of a solution.
+
+Let's add custom metrics that will track the number of infected and number of clean files that have been processed by the system.
+
+Open `server.ts` again.
+
+After the line that registers the plugin, create a [custom metric](https://github.com/siimon/prom-client#custom-metrics) to track the number of files that were scanned cleanly:
+
+```typescript
+  const numberOfCleanFilesScanned = new fastify.metrics.client.Counter(
+    {
+      name: "clean_files_count",
+      help: "The number of clean files that have been scanned by the service."
+    }
+  );
+```
+
+Check the metrics page to validate that you can see the `clean_files_count` metric.
+
+Make a few `POST` requests to scan content.
+
+1. Why isn't the counter being incremented?
+
+We now have to decide how that counter will be incremented. We have a couple of options:
+
+* change the return type of `EvidenceService+fileUpload` to to have a flag that says whether the file was infected or not and increment the counter from the route handler; or
+* somehow get the counter into `EvidenceService+fileUpload` and increment it from there.
+
+As we consider the job of fastify to be *only* dealing with HTTP and handing off to the service as soon as possible, we can rule out the first option. Futhermore, that option would also mean that, for each metric we want to collect, we have to somehow expose information back to the route handler.
+
+We *could* add a new parameter to `EvidenceService+fileUpload`, but that seems like something that we don't want to bother the caller with. The caller doesn't really care about the metrics that the implementation happens to emit.
+
+Instead, let's wire the metrics through the constructor, similarly to how we handle the other "creation time" concern: configuration.
+
+As we haven't anticipated this we will need to do a bit of re-wiring.
+
+Change the return type of `buildFastifyServer` to:
+
+```typescript
+export const buildFastifyServer = async (
+  maximum_upload_size: number
+): Promise<FastifyInstance & {
+  metrics: IFastifyMetrics
+}>
+```
+
+(i.e. to expose the details of the metrics plugin to the caller).
+
+Then in `index.ts` (our Assembler) modify:
+
+```typescript
+then((fastify) => {
+ 
+  // Your service creation is here.
+  
+  buildFastifyRoutes(fastify, evidenceService);
+  return fastify;
+}).
+```
+
+to
+
+```typescript
+then((fastifyWithMetrics) => {
+
+  const numberOfCleanFilesScanned = new fastifyWithMetrics.metrics.client.Counter(
+    {
+      name: "clean_files_count",
+      help: "The number of clean files that have been scanned by the service."
+    }
+  );
+
+  // Your service creation is here.
+
+  buildFastifyRoutes(fastifyWithMetrics, evidenceService);
+  return fastifyWithMetrics;
+}).
+```
+
+Check the metrics page to validate that you can still see the `clean_files_count` metric.
+
+Update the constructor for `EvidenceService` to accept a new parameter:
+
+```typescript
+incrementCleanFilesCounter: () => void
+```
+
+and satisfy it in the Asssembler with:
+
+```typescript
+const evidenceService = new EvidenceService(
+  // Your configuration goes here.
+  () => numberOfCleanFilesScanned.inc()
+);
+```
+
+Update the implementation of the 'clean' branch to call:
+
+```
+this.incrementCleanFilesCounter();
+```
+
+### More metrics
+
+Repeat this process to track the number of infected files that were scanned.
+
+Then add a new histogram to the `AwsService` that tracks the size of content uploaded to S3.
+
+1. How did you choose to pass the histogram to the AwsService?
+2. What is the type of the constructor parameter?
+3. Do you agree that metrics should be passed through the constructor (during creation) rather than as parameters of the method (during usage)?
+4. Can you think of other ways of measuring these metrics?
+5. In the future, how would you decide between passing in through the constructor or method?
+
+## Wrapping Up
+Our solution is much more observable than before.
+
+* We emit log messages that tell us what is happening in the service ✅.
+* Those log messages tell us *why* the solution is behaving as it does ✅.
+* Log messages include some structured data that will make processing our messages easier ✅.
+* We are measuring technical metrics ✅.
+* We've identified some business metrics and are measuring those ✅.
+
+* We don't yet support standard tracing mechanisms ❌.
+
+1. What other metrics do you think that we should measure?
+2. What else would help us observe the solution?
+
+[^1]: *without* resorting to attaching a debugger (which may not even be possible when running in a production environment).

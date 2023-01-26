@@ -1,14 +1,15 @@
 import {
   EvidenceService,
 } from "./services";
-import { buildFastifyServer, startServer } from "./server";
-
-const evidenceService = new EvidenceService();
-
-const fastify = buildFastifyServer(
-  parseInt(process.env["MAXIMUM_FILE_UPLOAD_SIZE"] || ""),
-  evidenceService
-);
+import { buildFastifyRoutes, buildFastifyServer, startServer } from "./server";
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-startServer(fastify);
+buildFastifyServer(
+  parseInt(process.env["MAXIMUM_FILE_UPLOAD_SIZE"] || ""),
+).
+then((fastify) => {
+  const evidenceService = new EvidenceService();
+  buildFastifyRoutes(fastify, evidenceService);
+  return fastify;
+}).
+then((fastify) => startServer(fastify));

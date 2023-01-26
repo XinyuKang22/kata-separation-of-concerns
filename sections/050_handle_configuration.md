@@ -14,7 +14,7 @@ export type EvidenceServiceConfiguration = {
     host: string;
     port: number;
   },
-  [OTHER CONFIGURATION GOES HERE]
+  // FIXME add other configuration
 };
 ```
 
@@ -45,7 +45,7 @@ const evidenceServiceConfiguration = {
     host: process.env["CLAMAV_HOST"] || "",
     port: parseInt(process.env["CLAMAV_PORT"] || "")
   },
-  [OTHER SETUP GOES HERE]
+  // FIXME other setup goes here.
 }
 ```
 
@@ -89,10 +89,10 @@ You should have noticed that we've effectively provided an unsafe value for the 
 ```typescript
 const evidenceServiceConfiguration = {
   clamAv: {
-    host: process.env["CLAMAV_HOST"] || "", // THIS IS MAKING "" OUR UNSAFE DEFAULT.
+    host: process.env["CLAMAV_HOST"] || "", // <-- DANGER: this is making "" our unsafe default.
 ```
 
-`""` is definitely not a safe default value. In this case, there is no safe default, so we need to have `index.ts` fail when no value is provided. We'll introduce better ways of handling this in a subsequent chapter, but for now, let's make a simple function:
+`""` is definitely not a safe default value[^1]. In this case, there is no safe default, so we need to have `index.ts` fail when no value is provided. We'll introduce better ways of handling this in a subsequent chapter, but for now, let's make a simple function:
 
 ```typescript
 const requiredEnvironment = (name: string): string => {
@@ -134,3 +134,5 @@ We haven't handled multiple errors in the best way possible though. The service 
 We will revisit this in a subsequent section.
 
 1. Are there any parallels between the poor feedback the service provides when multiple pieces of configuration are missing and when the content scanning request is broken in multiple ways?
+
+[^1]: an unsafe default that exists only to make the type system be quiet is a very bad thing and very unfun thing to uncover when trying to deploy a system.
