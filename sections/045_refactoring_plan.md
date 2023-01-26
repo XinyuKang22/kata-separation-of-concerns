@@ -20,7 +20,7 @@ Right now, the responsibilities are:
 | Start server             | Assembler | Creation |
 | Read environment to set up dependencies | `EvidenceService` | Usage |
 | Parse incoming request from HTTP to domain-specific type | Route Handler (`server.ts`) | Usage |
-| Invoke virus scanning service | `EvidenceService` | Usage |
+| Call virus scanning service | `EvidenceService` | Usage |
 | Interprets the results to decide what to do. | `EvidenceService` | Usage |
 | Uploads the content to S3. | `awsService.ts` | Usage |
 | Sometimes, updates mongo with the metadata. | `EvidenceService` | Usage |

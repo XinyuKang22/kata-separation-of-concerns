@@ -32,3 +32,5 @@ This repository includes a Postman collection (see `/testing`), so using Postman
 [Observability](sections/070_better_observability.md)
 
 [Error Handling](sections/080_error_handling.md)
+
+[Conclusion](sections/100_conclusion.md)

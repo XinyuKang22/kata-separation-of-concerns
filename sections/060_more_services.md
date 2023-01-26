@@ -26,7 +26,7 @@ The `EvidenceService` is doing a lot of work in our implementation at the moment
 | Create routes            | Assembler | Creation |
 | Start server             | Assembler | Creation |
 | Parse incoming request from HTTP to domain-specific type | Route Handler (`server.ts`) | Usage |
-| Invoke virus scanning service | `EvidenceService` | Usage |
+| Call virus scanning service | `EvidenceService` | Usage |
 | Interprets the results to decide what to do. | `EvidenceService` | Usage |
 | Uploads the content to S3. | `awsService.ts` | Usage |
 | Sometimes, updates mongo with the metadata. | `EvidenceService` | Usage |
@@ -126,7 +126,7 @@ After this refactor the responsibilities are:
 | Start server             | Assembler | Creation |
 | Parse incoming request from HTTP to domain-specific type | Route Handler (`server.ts`) | Usage |
 | Orchestrate other services[^2] | `EvidenceService` | Usage |
-| Invoke virus scanning service | `VirusScanningService` | Usage |
+| Call virus scanning service | `VirusScanningService` | Usage |
 | Interprets the results to decide what to do. | `EvidenceService` | Usage |
 | Uploads the content to S3. | `AwsService` | Usage |
 | Sometimes, updates mongo with the metadata. | `MetadataService` | Usage |
