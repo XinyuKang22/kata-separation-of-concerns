@@ -2,6 +2,7 @@ name: generate plantuml
 # Restrict it to run only when top-level files in /uml are modified but not on
 # the main branch to avoid commits being made directly against main.
 on:
+  workflow_dispatch:
   push:
     paths:
       - "uml/*"
