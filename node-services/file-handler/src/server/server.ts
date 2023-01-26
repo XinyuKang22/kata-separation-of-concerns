@@ -75,7 +75,7 @@ export const buildFastifyRoutes = (
     "/evidence/:evidenceId", async (request, reply) => {
       const { evidenceId } = request.params as { evidenceId: string};
 
-      await evidenceService.fetchDetails(evidenceId);
+      return await evidenceService.fetchDetails(evidenceId);
     }
   )
 

@@ -98,7 +98,7 @@ export class EvidenceService {
 
     const client = new MongoClient(mongoConnectionUri);
 
-    const collection = await client.db("default").collection("default");
+    const collection = client.db("default").collection("default");
 
     return await collection.findOne({
       _id: new ObjectId(evidenceId)
