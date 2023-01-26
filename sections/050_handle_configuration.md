@@ -109,12 +109,13 @@ then update the creation of the configuration object to use that instead of `pro
 Now watch the service restart in Tilt.
 
 1. Does the service start up? Why?
+2. What other pieces of configuration have no default value and must be provided?
 
-Delete or comment out another piece of required configuration.
+Update your configuration to use `requiredEnvironment` for those other pieces of configuration then delete or comment out another piece of required configuration.
 
-1. What error messages do you see?
-2. As an operator that can't read the implementation, do you get enough information to fix all the configuration problems in one pass? Or would you need to iterate until you had it working?
-3. What could be done to fix that?
+3. What error messages do you see?
+5. As an operator that can't read the implementation, do you get enough information to fix all the configuration problems in one pass? Or would you need to iterate until you had it working?
+5. What could be done to fix that?
 
 Fix your configuration and check that the service starts and can process content scanning requests.
 
@@ -122,13 +123,13 @@ Fix your configuration and check that the service starts and can process content
 
 All reading of the environment now happens in one place (`index.ts`) and when the service starts up. We've also clearly identified configuration items that have no safe defaults and must be specified. This means that:
 
-1. Only one place in our code knows about how configuration is provided (i.e. through environment variables). If we wanted to source from a configuration file or a database, we'd only be making a single change ✅.
-2. The service fails to start with an okay-ish error message if a piece of required configuration is missing ✅.
-3. Dependencies of the `EvidenceService` are explicitly defined ✅.
+* Only one place in our code knows about how configuration is provided (i.e. through environment variables). If we wanted to source from a configuration file or a database, we'd only be making a single change ✅.
+* The service fails to start with an okay-ish error message if a piece of required configuration is missing ✅.
+* Dependencies of the `EvidenceService` are explicitly defined ✅.
 
 We haven't handled multiple errors in the best way possible though. The service fails to start when the first piece of missing configuration is encountered. This means that deploying the service may be more frustrating than is necessary - the deployer has to read the error message, provide the missing configuration, read the next error message, provide the next piece of missing configuration, repeat until success.
 
-4. The service provides great feedback when it fails to start ❌.
+* The service provides great feedback when it fails to start ❌.
 
 We will revisit this in a subsequent section.
 

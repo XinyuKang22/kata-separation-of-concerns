@@ -6,9 +6,9 @@ The different pieces of the stack are brought together in the `Tiltfile`.
 
 Look in that Tiltfile and find the four major pieces:
 
-* A NodeJS service that will orchestrate scanning, storage of content and persistence of meta-data.
+* A NodeJS service that will orchestrate scanning, storage of content and persistence of metadata.
 * ClamAV that can scan content for viruses.
-* MongoDB for persisting the meta-data of scanned content.
+* MongoDB for persisting the metadata of scanned content.
 * An AWS S3 analog / stand-in that can store content.
 
 ## Start Tilt
@@ -62,7 +62,7 @@ Take a look at the logs for the `file-handler` service.
 
 ## Check the stored data
 
-Using the `evidenceId` that was returned to you earlier, send a `GET` request to the appropriate (hint: look at the server definition again) path to get the details of the evidence. Verify that you get a `200` response that contains the meta-data about the content as well as the location it has been stored in and whether it was infected or not.
+Using the `evidenceId` that was returned to you earlier, send a `GET` request to the appropriate (hint: look at the server definition again) path to get the details of the evidence. Verify that you get a `200` response that contains the metadata about the content as well as the location it has been stored in and whether it was infected or not.
 
 ## Wrapping up
 

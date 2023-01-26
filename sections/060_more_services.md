@@ -24,46 +24,46 @@ The `EvidenceService` is doing a lot of work in our implementation at the moment
 3. Invokes the virus scanning service - `EvidenceService`.
 4. Interprets the results to decide what to do - `EvidenceService`.
 5. Uploads the content to S3 - `awsService.ts`.
-6. Sometimes, updates mongo with the meta-data - `EvidenceService`.
+6. Sometimes, updates mongo with the metadata - `EvidenceService`.
 7. Returns a HTTP response to the caller  - `Fastify`.
 
-Not only is the `EvidenceService` doing the bulk of the work, but it is also tied to (and has intimate knowledge of) the current implementations for virus scanning, uploading content and storing (and reading) meta-data.
+Not only is the `EvidenceService` doing the bulk of the work, but it is also tied to (and has intimate knowledge of) the current implementations for virus scanning, uploading content and storing (and reading) metadata.
 
 The refactoring that we did earlier gives us a clear picture of the 
 
 Let's split the EvidenceService into more pieces:
 
-1. A `MetaDataService` that provides methods to write and read meta-data.
+1. A `MetadataService` that provides methods to write and read metadata.
 2. A `VirusScanningService` that provide a method to scan content.
 
 Let's also refactor `awsService.ts` to be a class that we can construct an instance of and pass into the `EvidenceService`.
 
-## MetaDataService
+## MetadataService
 
-Starting with the `MetaDataService`, create a new file `metaDataService.ts` and define a new class:
+Starting with the `MetadataService`, create a new file `metadataService.ts` and define a new class:
 
 ```typescript
-export type MetaDataServiceConfiguration = {
+export type MetadataServiceConfiguration = {
 };
 
-export class MetaDataService {
+export class MetadataService {
 
-  readonly configuration: MetaDataServiceConfiguration;
+  readonly configuration: MetadataServiceConfiguration;
 
-  constructor(configuration: MetaDataServiceConfiguration) {
+  constructor(configuration: MetadataServiceConfiguration) {
     this.configuration = configuration;
   }
 ```
 
-Then grab the functions that relate to handling meta-data and convert them to methods of that class.
+Then grab the functions that relate to handling metadata and convert them to methods of that class.
 
-You'll notice that those methods currently accept 'configuration' info (e.g. the mongodb username and password) in their parameters. That configuration is implementation specific and shouldn't be controlled by the caller - it should be provided by the "Assembler" when the MetaDataService is instantiated.
+You'll notice that those methods currently accept 'configuration' info (e.g. the mongodb username and password) in their parameters. That configuration is implementation specific and shouldn't be controlled by the caller - it should be provided by the "Assembler" when the MetadataService is instantiated.
 
 // TODO add diagram with config at creation vs parameters at usage.
 
 Move that configuration out of the method parameters into the constructor's configuration type.
 
-You should be able to remove mongo specific configuration from `EvidenceServiceConfiguration`. Update the constructor of `EvidenceService` to take an instance of `MetaDataService` and call that service in `handleCleanFile`.
+You should be able to remove mongo specific configuration from `EvidenceServiceConfiguration`. Update the constructor of `EvidenceService` to take an instance of `MetadataService` and call that service in `handleCleanFile`.
 
 1. What else do you need to update to have the service compile and start successfully?
 
@@ -82,7 +82,7 @@ You should be able follow the same process as before to create a new Virus Scann
 
 ## Another Service?
 
-`EvidenceService` is now getting quite small. It orchestrates the virus scanner, meta-data and AWS services to perform work. Besides that, it only has one responsibility: interpret the results of the virus scan and decide what to do next. That decision is very simple.
+`EvidenceService` is now getting quite small. It orchestrates the virus scanner, metadata and AWS services to perform work. Besides that, it only has one responsibility: interpret the results of the virus scan and decide what to do next. That decision is very simple.
 
 In some cases, decisions may be much more complex. It may be that whether to quarantine the file depends on more factors:
 

@@ -1,6 +1,6 @@
 # Re-factoring 101
 
-The simplest refactoring that we can usefully perform is to break up the `fileUpload` method into smaller functions that have informative names. That way a reader will be able to understand the logic of the method without having to abstract away the detail themselves.
+The simplest refactoring that we can usefully perform is to break up the `EvidenceService+fileUpload` method into smaller functions that have informative names. That way a reader will be able to understand the logic of the method without having to mentally abstract away the details. That is, it will be easier to build a mental model of what the method does.
 
 Start with the three statements that scan the content for viruses.
 
