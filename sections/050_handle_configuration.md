@@ -33,7 +33,7 @@ Check Tilt.
 1. Is the `file-handler` service healthy?
 2. What error is it reporting?
 
-Open up `node-services/file-handler/src/index.ts`. This top-level file is responsible for building the server and then starting it. In order to build the server, it needs to be passed its dependencies. Right now, it only has one dependency - the `EvidenceService`.
+Open up the Assembler in `node-services/file-handler/src/index.ts`. This top-level file is responsible for assembling the service and then starting it. In order to build the server, it needs to be passed its dependencies. Right now, it only has one dependency - the `EvidenceService`.
 
 `index.ts` needs to be updated so that it provides the necessary configuration to the `EvidenceService`.
 

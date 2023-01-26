@@ -13,12 +13,12 @@ Compare it with [this example](https://agiledigital.atlassian.net/wiki/spaces/FO
 
 Read through the rest of [that confluence page](https://agiledigital.atlassian.net/wiki/spaces/FORGE/pages/27197539/Separating+Concerns).
 
-## Identifying key function
+## Identifying key functions
 
 As noted in the confluence page, the `file-handler` service performs a few key functions for each request:
 
 1. Reads the environment to set up its dependencies.
-2. Parses the incoming request (leveraging `fastify`).
+2. Parses the incoming request (leveraging `fastify`) into a domain-specific type.
 3. Invokes the virus scanning service.
 4. Interprets the results to decide what to do.
 5. Uploads the content to S3.
@@ -26,6 +26,11 @@ As noted in the confluence page, the `file-handler` service performs a few key f
 7. Returns a HTTP response to the caller (leveraging `fastify`).
 
 This general pattern will repeat in nearly everything that we build.
+
+Futhermore, the service performs a couple of functions when starting up:
+1. Creates the `EvidenceService`.
+2. Uses the `EvidenceService` to build the routes.
+3. Starts the server.
 
 None of these things are performed well in the current solution. Even for this very small piece of code, the solution is harder than it should be to understand, the solution is harder to operate (it fails slow), and by mixing logic and effects (calling external services) the solution's logic is harder to test.
 

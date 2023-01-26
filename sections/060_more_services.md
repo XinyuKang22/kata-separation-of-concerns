@@ -19,13 +19,19 @@ Martin Fowler [described three types of dependency injection](https://martinfowl
 
 The `EvidenceService` is doing a lot of work in our implementation at the moment. Referring back to our original list of concerns, after our configuration refactor, responsibilities are allocated per:
 
-1. Reads the environment to set up its dependencies - `index.ts` (the 'Assembler' in Fowler's article).
-2. Parses the incoming request - `Fastify`.
-3. Invokes the virus scanning service - `EvidenceService`.
-4. Interprets the results to decide what to do - `EvidenceService`.
-5. Uploads the content to S3 - `awsService.ts`.
-6. Sometimes, updates mongo with the metadata - `EvidenceService`.
-7. Returns a HTTP response to the caller  - `Fastify`.
+| What                     | Where      | When |
+| ---- | --- | --- |
+| Read environment to set up dependencies | Assembler | Creation |
+| Create `EvidenceService` | Assembler (top-level `index.ts`) | Creation |
+| Create routes            | Assembler | Creation |
+| Start server             | Assembler | Creation |
+| Parse incoming request from HTTP to domain-specific type | Route Handler (`server.ts`) | Usage |
+| Invoke virus scanning service | `EvidenceService` | Usage |
+| Interprets the results to decide what to do. | `EvidenceService` | Usage |
+| Uploads the content to S3. | `awsService.ts` | Usage |
+| Sometimes, updates mongo with the metadata. | `EvidenceService` | Usage |
+| Translate domain-specific response to HTTP response | Route Handler | Usage |
+
 
 Not only is the `EvidenceService` doing the bulk of the work, but it is also tied to (and has intimate knowledge of) the current implementations for virus scanning, uploading content and storing (and reading) metadata.
 
@@ -105,6 +111,25 @@ In this case, the rule is simple enough that we are happy to leave it as part of
 
 ## Wrapping up
 
+After this refactor the responsibilities are:
+
+| What                     | Where      | When |
+| ---- | --- | --- |
+| Read environment to set up dependencies | Assembler | Creation |
+| Create services[^1] | Assembler (top-level `index.ts`) | Creation |
+| Create routes            | Assembler | Creation |
+| Start server             | Assembler | Creation |
+| Parse incoming request from HTTP to domain-specific type | Route Handler (`server.ts`) | Usage |
+| Invoke virus scanning service | `VirusScanningService` | Usage |
+| Interprets the results to decide what to do. | `EvidenceService` | Usage |
+| Uploads the content to S3. | `AwsService` | Usage |
+| Sometimes, updates mongo with the metadata. | `MetadataService` | Usage |
+| Translate domain-specific response to HTTP response | Route Handler | Usage |
+
+This is starting to look at lot more reasonable.
+
 1. What is the cyclometric complexity of the `fileUpload` method?
 2. What are the branches?
 3. Does the implementation provide better log messages or responses when receiving good and bad requests?
+
+[^1]: Note that we've generalised this from "Create `EvidenceService`".

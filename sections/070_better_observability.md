@@ -13,6 +13,8 @@ Currently, neither of these approaches provides useful information. The implemen
 2. How does our solution rate in that aspect?
 3. What changes could we make to improve its rating?
 
+Before we make any more changes to the services, let's improve our ability to observe it.
+
 ## Logging
 
 Although modern software benefits from advanced tooling that can dramatically improve the observability of a solution, logs are still the foundation of observability. [A thoughtful log message](https://agiledigital.atlassian.net/wiki/spaces/FORGE/pages/27199452/Writing+Log+Messages) becomes an asset used by people both operating the system (they get observability) but also people seeking to understand the code (the log message is akin to a good code comment).
@@ -276,7 +278,17 @@ Our solution is much more observable than before.
 * We are measuring technical metrics ✅.
 * We've identified some business metrics and are measuring those ✅.
 
+However,
+
 * We don't yet support standard tracing mechanisms ❌.
+
+After these changes, we've introduced some additional responsibilities:
+
+| What                     | Where      | When |
+| ---- | --- | --- |
+| Creating business metrics | Assembler | Creation |
+| Adding request specific data to logging context | Route Handler | Usage |
+| Measuring business metrics | `EvidenceService` + `AwsService` | Usage |
 
 1. What other metrics do you think that we should measure?
 2. What else would help us observe the solution?
