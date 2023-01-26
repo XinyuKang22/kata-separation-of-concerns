@@ -134,7 +134,7 @@ Send the request again and check the message in the response body.
 2. Where can you see the `cause` of the error?
 3. Do you think that 'wrapping' the original error in this way provides additional, useful context?
 
-Fix the servers configuration and verify that everything works again.
+Fix the server's configuration and verify that everything works again.
 
 ## Handling user errors
 
