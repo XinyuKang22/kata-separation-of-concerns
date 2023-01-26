@@ -14,5 +14,15 @@ This repository includes a Postman collection (see `/testing`), so using Postman
 # Sections
 
 [Getting Started](sections/010_getting_started.md)
+
 [Exploratory Testing](sections/020_exploratory_testing.md)
+
 [Service Structure](sections/030_service_structure.md)
+
+[Refactoring 101](sections/040_extract_to_functions.md)
+
+[Configuration Handling](sections/050_handle_configuration.md)
+
+[Refactoring 201](sections/060_more_services.md)
+
+[Observability](sections_070_better_observability.md)
