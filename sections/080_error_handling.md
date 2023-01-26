@@ -95,17 +95,17 @@ Right now the error is bubbling up from the internals of mongo's client library.
 * mongo internals are leaking to callers
 * no additional context is added by the `EvidenceService`.
 
-If you look at the type signature for `EvidenceService+uploadFile` you'll notice that we explicitly state the promise may return `Errors`:
+If you look at the type signature for `EvidenceService+uploadFile` you'll notice that we explicitly state the promise may return an instace of `Error` (Javascript's [standard error type](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)):
 
 ```typescript
-Promise<{ evidence_id: string } | Errors>
+Promise<{ evidence_id: string } | Error>
 ```
 
 and then the POST handler uses that information:
 
 ```typescript
-if (isErrors(processResult)) {
-  await sendErrorReply(reply)(processResult.errors.join(" "));
+if (processResult instanceof Error) {
+  await sendErrorReply(reply)(processResult);
   return;
 }
 ```

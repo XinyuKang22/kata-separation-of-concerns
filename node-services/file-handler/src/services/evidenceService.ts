@@ -4,7 +4,6 @@ import http from "http";
 import { FastifyBaseLogger } from "fastify";
 import { uploadFileToS3 } from ".";
 import { UploadRequest } from "../types";
-import { Errors } from ".";
 import NodeClam from "clamscan";
 import { MongoClient, ObjectId } from "mongodb";
 
@@ -23,7 +22,7 @@ export class EvidenceService {
     inputParameters: UploadRequest["body"]["input"]["data"],
     requestHeaders: http.IncomingHttpHeaders,
     log: FastifyBaseLogger
-  ): Promise<{ evidence_id: string } | Errors> {
+  ): Promise<{ evidence_id: string } | Error> {
       const fileBuffer = Buffer.from(inputParameters.base64_data, "base64");
 
       const uuid = uuidv4();
@@ -59,9 +58,7 @@ export class EvidenceService {
           fileBuffer
         );
 
-        return {
-          errors: ["File is infected"]
-        }
+        return new Error("File is infected");
       } else {
     
         await uploadFileToS3(

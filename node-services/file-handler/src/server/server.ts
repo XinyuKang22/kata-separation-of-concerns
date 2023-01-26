@@ -3,7 +3,6 @@ import Fastify, {
   FastifyReply,
   FastifyRequest,
 } from "fastify";
-import { isErrors } from "../services";
 import { EvidenceService } from "../services";
 import { UploadRequest } from "../types";
 
@@ -26,12 +25,10 @@ export const buildFastifyRoutes = (
 
   const logger = fastify.log;
 
-  const sendErrorReply = (reply: FastifyReply) => async (message: string) => {
-    fastify.log.error({
-      message,
-    });
+  const sendErrorReply = (reply: FastifyReply) => async (error: Error) => {
+    fastify.log.error(error);
 
-    await reply.status(400).send({ message });
+    await reply.status(400).send({ message: error.message });
   };
 
   /**
@@ -65,8 +62,8 @@ export const buildFastifyRoutes = (
         logger
       );
 
-      if (isErrors(processResult)) {
-        await sendErrorReply(reply)(processResult.errors.join(" "));
+      if (processResult instanceof Error) {
+        await sendErrorReply(reply)(processResult);
         return;
       }
 
@@ -78,7 +75,7 @@ export const buildFastifyRoutes = (
     "/evidence/:evidenceId", async (request, reply) => {
       const { evidenceId } = request.params as { evidenceId: string};
 
-      return await evidenceService.fetchDetails(evidenceId);
+      await evidenceService.fetchDetails(evidenceId);
     }
   )
 
