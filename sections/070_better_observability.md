@@ -264,6 +264,8 @@ Then add a new histogram to the `AwsService` that tracks the size of content upl
 3. Do you agree that metrics should be passed through the constructor (during creation) rather than as parameters of the method (during usage)?
 4. Can you think of other ways of measuring these metrics?
 5. In the future, how would you decide between passing in through the constructor or method?
+6. We may end up passing a lot of metrics to a service. Is there a way of simplifying the signature of the constructor?
+7. If we end up with a lot of parameters of the same type (e.g. `() => ()`) is there a way of making sure that we don't accidentally pass the wrong counter to a parameter (e.g. the clean counter to the infected counter parameter)?
 
 ## Wrapping Up
 Our solution is much more observable than before.
