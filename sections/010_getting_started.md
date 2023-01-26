@@ -6,14 +6,14 @@ The different pieces of the stack are brought together in the `Tiltfile`.
 
 Look in that Tiltfile and find the four major pieces:
 
-* A NodeJS service that will orchestrate scanning, storage and persistence of uploaded content.
+* A NodeJS service that will orchestrate scanning, storage of content and persistence of meta-data.
 * ClamAV that can scan content for viruses.
 * MongoDB for persisting the meta-data of scanned content.
 * An AWS S3 analog / stand-in that can store content.
 
 ## Start Tilt
 
-From the directory containing this README (and the `Tiltfile`), run `tilt up` to start Tilt. Press `space` to get tilt to open the browser console. If everything is working, you can expect to see that resources for each of the pieces listed above as well as the `Tiltfile` itself.
+From the directory containing this README (and the `Tiltfile`), run `tilt up` to start Tilt. Press `space` to get Tilt to open the browser UI. If everything is working, you can expect to see that resources for each of the pieces listed above as well as the `Tiltfile` itself.
 
 Check that each resource is 'green' and running.
 
