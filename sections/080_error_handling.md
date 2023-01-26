@@ -153,3 +153,93 @@ Let's think about what we would out of a good translation between the HTTP reque
 
 * Good error messages to help us develop and operate.
 * Truthful types (e.g. not using `as`).
+
+To make the job of doing this easier, let's use an existing library to do this work.
+
+Install [zod](https://github.com/colinhacks/zod) in the same way that you installed `fastify-metrics`.
+
+We'll add the zod schema in a new file named `codecs.ts`. Create it in the `types` directory.
+
+Once you have the file, add the simplest codec for the `UploadRequest`:
+
+```typescript
+import { z } from "zod";
+
+export const UploadRequestSchema = z.object({
+    body: z.object({
+        action: z.object({
+            name: z.string(),
+        }),
+        input: z.object({
+            data: z.object({
+                filename: z.string(),
+                base64_data: z.string(),
+                name: z.string(),
+                description: z.string()
+            })
+        })
+    }),
+});
+```
+
+You'll notice a lot of similarity between this schema and the `UploadRequest` type itself. To avoid duplication, we can derive the type from the schema. To do so, modify `upload.ts` to have:
+
+```typescript
+export type UploadRequest = z.infer<typeof UploadRequestSchema>;
+```
+
+Now, we have to use that new schema to parse our request[^1].
+
+Change the POST handler to *not* use as:
+
+```typescript
+const uploadRequest = UploadRequestSchema.parse(request);
+```
+
+And send a your bad request.
+
+7. Are we getting better error messages from the server?
+8. Remove another required property. Do you get information about both missing fields in the response?
+
+You'll note that the status is still inappropriate. When a caller supplies bad data, the server should return a 400 status.
+
+This is because `parse` (although it faithfully returns the type that it does), can also throw an error. We could catch that error, but it is preferable to use methods don't have holes in their types.
+
+Switch the Route handler to use the method that will parse safely.
+
+```typescript
+const uploadRequest = UploadRequestSchema.safeParse(request);
+```
+
+Your code should have errors now, because the type of `safeParse` has changed.
+
+Add the code to handle the error case and allow TypeScripts flow typing to narrow the type down to the success case:
+
+```typescript
+const uploadRequest = UploadRequestSchema.safeParse(request);
+if (!uploadRequest.success) {
+  return await reply.status(400).send({
+    ...uploadRequest.error,
+    message: "Failed to parse upload request",
+  });
+}
+```
+
+Send your request again and check that the response contains some great error messages.
+
+9. Do you think it is appropriate to return this level of detail in a production system?
+10. Do you think that details of bad requests should be logged?
+11. The [Robustness Principle](https://en.wikipedia.org/wiki/Robustness_principle) states that we should be "be conservative in what you send, be liberal in what you accept". Do you think that we should try to 'repair' bad requests if we can?
+
+## Wrapping up
+
+We've touched on two responsibilities in this section:
+
+| What                     | Where      | When |
+| ---- | --- | --- |
+| Parse incoming request from HTTP to domain-specific type | Route Handler (`server.ts`) | Usage |
+| Translate domain-specific response to HTTP response | Route Handler | Usage |
+
+and significantly improved the behaviour of both.
+
+[^1]: Remember to [parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/).

@@ -28,7 +28,7 @@ export const buildFastifyRoutes = (
   const sendErrorReply = (reply: FastifyReply) => async (error: Error) => {
     fastify.log.error(error);
 
-    await reply.status(400).send({ message: error.message });
+    await reply.status(500).send({ message: error.message });
   };
 
   /**
@@ -54,10 +54,10 @@ export const buildFastifyRoutes = (
       | undefined
     > => {
 
-      const requestBody = request as UploadRequest;
+      const uploadRequest = request as UploadRequest;
 
       const processResult = await evidenceService.fileUpload(
-        requestBody.body.input.data,
+        uploadRequest.body.input.data,
         request.headers,
         logger
       );
