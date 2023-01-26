@@ -94,3 +94,20 @@ We mentioned before that throwing an error (e.g. `throw new Error('something fai
 Right now the error is bubbling up from the internals of mongo's client library. This means that:
 * mongo internals are leaking to callers
 * no additional context is added by the `EvidenceService`.
+
+If you look at the type signature for `EvidenceService+uploadFile` you'll notice that we explicitly state the promise may return `Errors`:
+
+```typescript
+Promise<{ evidence_id: string } | Errors>
+```
+
+and then the POST handler uses that information:
+
+```typescript
+if (isErrors(processResult)) {
+  await sendErrorReply(reply)(processResult.errors.join(" "));
+  return;
+}
+```
+
+Let's follow a similar pattern here.
