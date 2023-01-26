@@ -9,6 +9,8 @@ Let's decide this by thinking about:
 
 In particular, we want to avoid burdening clients (callers) of a function or method with having to provide too much information to get the output that they want. Likewise, we don't want to expose implementation specific information to callers.
 
+We also want to know as soon as possible whether the pre-conditions for something have not been satisfied.
+
 Right now, the responsibilities are:
 
 | What                     | Where      | When |
