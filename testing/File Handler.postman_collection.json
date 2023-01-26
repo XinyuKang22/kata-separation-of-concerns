@@ -9,7 +9,18 @@
 			"name": "Health Check",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}:{{port}}/hc",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"hc"
+					]
+				}
 			},
 			"response": []
 		},
@@ -72,6 +83,43 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "port",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "postpath",
+			"value": "",
+			"type": "default"
 		}
 	]
 }
