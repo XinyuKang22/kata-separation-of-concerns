@@ -1,6 +1,6 @@
 # Refactoring 201
 
-Let's turn our focus back to `evidenceService.ts`. Having seen how the service is created in `index.ts`, you may see a reasonable pattern for creating the server emerging:
+Let's turn our focus back to `evidenceService.ts`. Having seen how the service is created in the Assembler (top-level `index.ts`), you may see a reasonable pattern for creating the server emerging:
 
 1. Read configuration from the environment.
 2. Use configuration to satisfy the dependencies of the `EvidenceService` and create an instance of it.
@@ -120,6 +120,7 @@ After this refactor the responsibilities are:
 | Create routes            | Assembler | Creation |
 | Start server             | Assembler | Creation |
 | Parse incoming request from HTTP to domain-specific type | Route Handler (`server.ts`) | Usage |
+| Orchestrate other services[^2] | `EvidenceService` | Usage |
 | Invoke virus scanning service | `VirusScanningService` | Usage |
 | Interprets the results to decide what to do. | `EvidenceService` | Usage |
 | Uploads the content to S3. | `AwsService` | Usage |
@@ -133,3 +134,4 @@ This is starting to look at lot more reasonable.
 3. Does the implementation provide better log messages or responses when receiving good and bad requests?
 
 [^1]: Note that we've generalised this from "Create `EvidenceService`".
+[^2]: A new responsibility.

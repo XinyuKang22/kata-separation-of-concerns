@@ -6,7 +6,7 @@ The different pieces of the stack are brought together in the `Tiltfile`.
 
 Look in that Tiltfile and find the four major pieces:
 
-* A NodeJS service that will orchestrate scanning, storage of content and persistence of metadata.
+* A NodeJS server that will orchestrate scanning, storage of content and persistence of metadata.
 * ClamAV that can scan content for viruses.
 * MongoDB for persisting the metadata of scanned content.
 * An AWS S3 analog / stand-in that can store content.
@@ -54,11 +54,11 @@ The request body should look like:
 
 Once you've sent the request, verify that you get a `200` response and a new `evidenceId`. 
 
-Take a look at the logs for the `file-handler` service.
+Take a look at the logs for the `file-handler` server.
 
 1. Can you see the logs that relate to the request that you just made?
-2. If you were making changes to the service, are there other log messages that you would like to see?
-3. If you were operating (i.e. running and supporting) the service, are there other log message that you would like to see?
+2. If you were making changes to the server, are there other log messages that you would like to see?
+3. If you were operating (i.e. running and supporting) the server, are there other log message that you would like to see?
 
 ## Check the stored data
 

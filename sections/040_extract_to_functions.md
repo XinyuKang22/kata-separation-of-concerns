@@ -70,7 +70,7 @@ Verify that `fileUpload` looks like:
 1. Is this method more readable than when you started refactoring? Why?
 2. Does your answer to the first question depend on how much you can trust the functions that you just extracted to do what their name and type says?
 3. Is there anything else worth extracting from this method?
-4. At what points in this refactoring process did you send requests to the service to check it still worked?
+4. At what points in this refactoring process did you send requests to the server to check it still worked?
 5. Did you get any other feedback that gave you confidence that the refactorings were correct?
 
 ## Reviewing the refactor
