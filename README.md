@@ -23,6 +23,8 @@ This repository includes a Postman collection (see `/testing`), so using Postman
 
 [Refactoring 101](sections/040_extract_to_functions.md)
 
+[Refactoring Plan](sections/045_refactoring_plan.md)
+
 [Configuration Handling](sections/050_handle_configuration.md)
 
 [Refactoring 201](sections/060_more_services.md)
