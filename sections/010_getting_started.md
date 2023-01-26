@@ -11,6 +11,10 @@ Look in that Tiltfile and find the four major pieces:
 * MongoDB for persisting the metadata of scanned content.
 * An AWS S3 analog / stand-in that can store content.
 
+Tilt will build and run these pieces inside the Kubernetes cluster that you have configured.
+
+![](.generated-diagrams/overview.svg)
+
 ## Start Tilt
 
 From the directory containing this README (and the `Tiltfile`), run `tilt up` to start Tilt. Press `space` to get Tilt to open the browser UI. If everything is working, you can expect to see that resources for each of the pieces listed above as well as the `Tiltfile` itself.
