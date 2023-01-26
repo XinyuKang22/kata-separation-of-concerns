@@ -3,7 +3,7 @@
 
 HIDE_STEREOTYPE()
 
-Person(alice, "Alice")
+Person(alice, "End User")
 
 Container(client, "HTTP Client", "", "")
 
