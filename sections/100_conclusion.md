@@ -34,3 +34,4 @@ Re-read [our confluence page on the separation of concerns](https://agiledigital
 * Clean up the extraction of the `evidenceId` from the path in the GET handler. Consider whether the route handler should know that the id is not a `string`, but is actually a MongoDB Object ID.
 * Add more considered error handling throughout the solution.
 * Find a way to have `fastify` provide 'good' responses when run by a developer and 'secure' responses when run in production. What is the downside of this approach?
+* Write tests for the `EvidenceService` using (eg) `jest`.
