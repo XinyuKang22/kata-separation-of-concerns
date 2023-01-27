@@ -1,8 +1,13 @@
 # Purpose
 
-This kata walks the student through applying the principle of "Separation of Concerns" (along with other software engineering principles) to the creation of a simple NodeJS service.
+This kata walks the student through applying the principle of "Separation of Concerns" (along with other software engineering principles) to refactor a simple NodeJS service.
 
 The student starts with a running - but extremely bad - implementation and refactors it, checking that the service continues to work along the way.
+
+At the end of the kata, the student can:
+1. Analyse the concerns that are at play in a system.
+2. Apply critical thinking to decide which components should own those concerns.
+3. Have experience refactoring a system to align with Agile Digital standards.
 
 # Pre-requisities
 
