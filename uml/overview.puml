@@ -19,7 +19,7 @@ System_Boundary(c1, "Kubernetes"){
 
 Rel_R(alice, client, "Uses", "")
 
-Rel_R(client, api, "Upload/Metadata Read", "HTTP")
+Rel_R(client, api, "Upload Content/Read Metadata", "HTTP")
 
 Rel_R(api, db, "Reads/Writes", "MongoDB Wire Protocol")
 

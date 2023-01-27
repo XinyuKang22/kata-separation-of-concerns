@@ -44,7 +44,7 @@ Doing a bit of type detecting, we can work out that the type is actually:
 async fetchDetails(evidenceId: string): Promise<WithId<Document> | null> {
 ```
 
-Since we don't want mongo specifics (`WithId`, `Document`) bleeding out into the Route Handler, let's hide that for now. Add the explicit type:
+Since we don't want MongoDBspecifics (`WithId`, `Document`) bleeding out into the Route Handler, let's hide that for now. Add the explicit type:
 
 ```typescript
 async fetchDetails(evidenceId: string): Promise<unknown | null> {
@@ -94,7 +94,7 @@ We mentioned before that throwing an error (e.g. `throw new Error('something fai
 5. Are we logging anything when the error occurs? Does it have helpful context?
 
 Right now the error is bubbling up from the internals of mongo's client library. This means that:
-* mongo internals are leaking to callers
+* MongoDBinternals are leaking to callers
 * no additional context is added by the `EvidenceService`.
 
 If you look at the type signature for `EvidenceService+uploadFile` you'll notice that we explicitly state the promise may return an instace of `Error` (Javascript's [standard error type](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)):

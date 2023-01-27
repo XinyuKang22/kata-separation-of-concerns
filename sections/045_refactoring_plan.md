@@ -23,7 +23,7 @@ Right now, the responsibilities are:
 | Call virus scanning service | `EvidenceService` | Usage |
 | Interprets the results to decide what to do. | `EvidenceService` | Usage |
 | Uploads the content to S3. | `awsService.ts` | Usage |
-| Sometimes, updates mongo with the metadata. | `EvidenceService` | Usage |
+| Sometimes, updates MongoDBwith the metadata. | `EvidenceService` | Usage |
 | Translate domain-specific response to HTTP response | Route Handler | Usage |
 
 Our exploratory testing has already identified the issues caused by the environment being read by the `EvidenceService` when it is being used. It would be much better if those errors occurred during startup.
