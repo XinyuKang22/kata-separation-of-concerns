@@ -31,3 +31,8 @@ rate the adequacy of the solution.
 1. The are many more files and services in our solution now. Do you think that the solution is harder or easier to understand?
 2. We've adopted an approach of injecting dependencies into the constructors of classes. What other approaches exist for providing dependencies?
 3. We've modelled 'effects' as `Promise<... | Error>`. What other approaches to modelling effects are you aware of?
+
+## Extension exercises
+* Clean up the extraction of the `evidenceId` from the path in the GET handler. Consider whether the route handler should know that the id is not a `string`, but is actually a MongoDB Object ID.
+* Add more considered error handling throughout the solution.
+* Find a way to have `fastify` provide 'good' responses when run by a developer and 'secure' responses when run in production. What is the downside of this approach?
