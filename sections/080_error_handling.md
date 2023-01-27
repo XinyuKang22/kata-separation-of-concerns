@@ -97,6 +97,18 @@ Right now the error is bubbling up from the internals of mongo's client library.
 * MongoDBinternals are leaking to callers
 * no additional context is added by the `EvidenceService`.
 
+Compare with a logged error that *does* provide additional context and clear causation:
+
+```sh
+Error: Failed to get project [MMAMOW2].
+    at Object.handler (/Users/dan/dev/agile/atlast/dist/scripts/get-project.js:441:15)
+    <snip>
+  [cause]: Error: Failed when invoking Jira API.
+      at /Users/dan/dev/agile/atlast/dist/scripts/get-project.js:90:16
+      <snip>
+    [cause]: Error: "Basic authentication with passwords is deprecated.  For more information, see: https://developer.atlassian.com/cloud/confluence/deprecation-notice-basic-auth/\n"
+```
+
 If you look at the type signature for `EvidenceService+uploadFile` you'll notice that we explicitly state the promise may return an instace of `Error` (Javascript's [standard error type](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)):
 
 ```typescript
