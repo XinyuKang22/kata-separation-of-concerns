@@ -1,8 +1,8 @@
 # Re-factoring 101
 
-The simplest refactoring that we can usefully perform is to break up the `EvidenceService+fileUpload` method into smaller functions that have informative names. That way a reader will be able to understand the logic of the method without having to mentally abstract away the details. That is, it will be easier to build a mental model of what the method does.
+The simplest refactoring that we can usefully perform is to break up long, difficult to maintain functions into smaller functions that have informative names. That way a reader will be able to understand the logic of the function without having to mentally abstract away the details. That is, it will be easier to build a mental model of what the function does.
 
-Start with the three statements that scan the content for viruses.
+Let's do that to `EvidenceService+fileUpload` method. Start with the three statements that scan the content for viruses.
 
 ```typescript
 const tempOptions = { 
