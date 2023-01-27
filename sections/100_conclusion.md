@@ -11,7 +11,7 @@ At the end of this exercise, responsibilities have been re-allocated per:
 | Start server             | Assembler | Creation |
 | Parse incoming request from HTTP to domain-specific type | Route Handler (`server.ts`) | Usage |
 | Adding request specific data to logging context | Route Handler | Usage |
-| Orchestrate other services[^2] | `EvidenceService` | Usage |
+| Orchestrate other services | `EvidenceService` | Usage |
 | Call virus scanning service | `VirusScanningService` | Usage |
 | Interprets the results to decide what to do. | `EvidenceService` | Usage |
 | Uploads the content to S3. | `AwsService` | Usage |
