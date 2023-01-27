@@ -15,7 +15,7 @@ At the end of this exercise, responsibilities have been re-allocated per:
 | Call virus scanning service | `VirusScanningService` | Usage |
 | Interprets the results to decide what to do. | `EvidenceService` | Usage |
 | Uploads the content to S3. | `AwsService` | Usage |
-| Sometimes, updates mongo with the metadata. | `MetadataService` | Usage |
+| Sometimes, updates MongoDBwith the metadata. | `MetadataService` | Usage |
 | Measuring business metrics | `EvidenceService` + `AwsService` | Usage |
 | Translate domain-specific response to HTTP response | Route Handler | Usage |
 

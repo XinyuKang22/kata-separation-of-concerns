@@ -29,7 +29,7 @@ The `EvidenceService` is doing a lot of work in our implementation at the moment
 | Call virus scanning service | `EvidenceService` | Usage |
 | Interprets the results to decide what to do. | `EvidenceService` | Usage |
 | Uploads the content to S3. | `awsService.ts` | Usage |
-| Sometimes, updates mongo with the metadata. | `EvidenceService` | Usage |
+| Sometimes, updates MongoDBwith the metadata. | `EvidenceService` | Usage |
 | Translate domain-specific response to HTTP response | Route Handler | Usage |
 
 
@@ -70,11 +70,11 @@ Then grab the functions that relate to handling metadata and convert them to met
 
 You'll notice that those methods currently accept 'configuration' info (e.g. the mongodb username and password) in their parameters. That configuration is implementation specific and shouldn't be controlled by the caller - it should be provided by the Assembler when the `MetadataService` is instantiated.
 
-// TODO add diagram with config at creation vs parameters at usage.
+![A typical separation of concerns. The Assembler can build implementation specific dependencies and use them to create Services. Callers know nothing of the dependencies when invoking methods.](../.generated-diagrams/creation_vs_usage.svg)
 
 Move that configuration out of the method parameters into the constructor's configuration type.
 
-You should be able to remove mongo specific configuration from `EvidenceServiceConfiguration`. Update the constructor of `EvidenceService` to take an instance of `MetadataService` and call that service in `handleCleanFile`.
+You should be able to remove MongoDBspecific configuration from `EvidenceServiceConfiguration`. Update the constructor of `EvidenceService` to take an instance of `MetadataService` and call that service in `handleCleanFile`.
 
 1. What else do you need to update to have the service compile and start successfully?
 
@@ -129,7 +129,7 @@ After this refactor the responsibilities are:
 | Call virus scanning service | `VirusScanningService` | Usage |
 | Interprets the results to decide what to do. | `EvidenceService` | Usage |
 | Uploads the content to S3. | `AwsService` | Usage |
-| Sometimes, updates mongo with the metadata. | `MetadataService` | Usage |
+| Sometimes, updates MongoDBwith the metadata. | `MetadataService` | Usage |
 | Translate domain-specific response to HTTP response | Route Handler | Usage |
 
 This is starting to look at lot more reasonable.

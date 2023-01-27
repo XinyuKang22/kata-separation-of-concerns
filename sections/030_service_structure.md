@@ -22,7 +22,7 @@ As noted in the confluence page, the `file-handler` server performs a few key fu
 3. Invokes the virus scanning service.
 4. Interprets the results to decide what to do.
 5. Uploads the content to S3.
-6. Sometimes, updates mongo with the metadata.
+6. Sometimes, updates MongoDBwith the metadata.
 7. Returns a HTTP response to the caller (leveraging `fastify`).
 
 This general pattern will repeat in nearly everything that we build.

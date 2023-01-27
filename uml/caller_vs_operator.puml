@@ -1,0 +1,16 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(caller, "Caller")
+
+System(system, "System")
+
+Person(operator, "Operator")
+
+Rel_D(system, operator, "Metrics, Logs, Events, Traces")
+
+Rel_R(caller, system, "Requests")
+
+Rel_L(system, caller, "Limited Responses")
+
+@enduml

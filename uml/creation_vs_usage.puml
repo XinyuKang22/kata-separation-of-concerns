@@ -1,0 +1,16 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+HIDE_STEREOTYPE()
+
+Component(assembler, "Assembler", "", "Creates instances of the Services, including any implementation specific dependencies.")
+
+Component(caller, "Caller", "", "Does not know any of the information required to create an instance, only that required to invoke a method.")
+
+Component(service, "Service", "", "Has dependencies provided, may not know the implementation details of those dependencies.")
+
+Rel_D(assembler, service, "Component Dependencies")
+
+Rel_R(caller, service, "Method invocation")
+
+@enduml
