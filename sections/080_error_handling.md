@@ -20,7 +20,7 @@ Moving on, a reasonable HTTP-driven server should return:
 
 Noting that it isn't always correct to be *too* helpful to callers (lest you facilitate an attack), a server should also be observable.
 
-// TODO diagram showing information going to caller and observer.
+![Callers may received limited information in responses so as to delay an attack on the system. Operators should recieve as much information as possible to trouble-shoot bad requests.](../.generated-diagrams/caller_vs_operator.svg)
 
 Remind yourself of what happens when you make a request for metadata using an evidence id that does not exist (but is well-formed).
 

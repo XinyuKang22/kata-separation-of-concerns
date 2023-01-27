@@ -70,7 +70,7 @@ Then grab the functions that relate to handling metadata and convert them to met
 
 You'll notice that those methods currently accept 'configuration' info (e.g. the mongodb username and password) in their parameters. That configuration is implementation specific and shouldn't be controlled by the caller - it should be provided by the Assembler when the `MetadataService` is instantiated.
 
-![](../.generated-diagrams/creation_vs_usage.svg)
+![A typical separation of concerns. The Assembler can build implementation specific dependencies and use them to create Services. Callers know nothing of the dependencies when invoking methods.](../.generated-diagrams/creation_vs_usage.svg)
 
 Move that configuration out of the method parameters into the constructor's configuration type.
 
