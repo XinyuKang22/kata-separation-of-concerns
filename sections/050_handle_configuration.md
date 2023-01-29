@@ -4,9 +4,10 @@ So, let's refactor handling of configuration so that it is performed by the Asse
 
 In general, we prefer that - if a server isn't correctly configured - it fails straight away and with a helpful error message. Having to run the server to verify whether it is correctly configured slows us down and reduces our confidence in any release. It also makes it harder to onboard a new developer if they have to run lengthy feedback cycles to get the configuration correct.
 
-Additionally, having a component pull information from the environment means that:
-1. that dependency isn't explicit in the signature of the constructor or any methods; and
-2. understand the totality of information required is difficult - it is diffused through the solution.
+Additionally, having a component pull information directly from the environment means that:
+1. that dependency isn't explicit in the signature of the constructor or any methods;
+2. understand the totality of information required is difficult - it is diffused through the solution; and
+3. it is difficult to change the solution to source configuration from a different place - many bits of code would need to be changed.
 
 Let's start by creating a type that will represent a 'valid' configuration for the `EvidenceService`.
 
