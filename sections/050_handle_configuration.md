@@ -4,6 +4,10 @@ So, let's refactor handling of configuration so that it is performed by the Asse
 
 In general, we prefer that - if a server isn't correctly configured - it fails straight away and with a helpful error message. Having to run the server to verify whether it is correctly configured slows us down and reduces our confidence in any release. It also makes it harder to onboard a new developer if they have to run lengthy feedback cycles to get the configuration correct.
 
+Additionally, having a component pulled information from the environment means that:
+1. that dependency isn't explicit in the signature of the constructor or any methods; and
+2. understand the totality of information required is difficult - it is diffused through the solution.
+
 Let's start by creating a type that will represent a 'valid' configuration for the `EvidenceService`.
 
 Go through the implementation of `EvidenceService` and find all the places where it uses `process.env` to pull configuration out of the environment. These are all candidates for putting into our configuration type.
