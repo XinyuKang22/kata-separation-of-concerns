@@ -4,12 +4,14 @@ Let's turn our focus back to `evidenceService.ts`. Having seen how the service i
 
 1. Read configuration from the environment.
 2. Use configuration to satisfy the dependencies of the `EvidenceService` and create an instance of it.
-3. Use the service instance to satisfy the dependencies of the `buildFastifyServer` function and create an instance of `FastifyServer`.
+3. Use the service instance to satisfy the dependencies of the `buildFastifyServer` function and create an instance of `FastifyInstance`.
 4. Start that server.
 
 We can invert this and think instead that our goal is to create an instance of the server then work backwards through the dependencies that we need.
 
-1. An alternative pattern may be to pass the `EvidenceServiceConfiguration` into `buildFastifyServer` and provide the necessary configuration as parameters when `EvidenceService+fileUpload` is called. What would be the advantages and disadvantages of this approach?
+An alternative pattern may be to pass the `EvidenceServiceConfiguration` into `buildFastifyServer` and provide the necessary configuration as parameters when `EvidenceService+fileUpload` is called. 
+
+1. What would be the advantages and disadvantages of this approach?
 
 Martin Fowler [described three types of dependency injection](https://martinfowler.com/articles/injection.html#FormsOfDependencyInjection):
 
@@ -54,8 +56,7 @@ As we don't want `EvidenceService` to know the implementation details of these n
 Starting with the `MetadataService`, create a new file `metadataService.ts` and define a new class:
 
 ```typescript
-export type MetadataServiceConfiguration = {
-};
+export type MetadataServiceConfiguration = {};
 
 export class MetadataService {
 
@@ -64,6 +65,7 @@ export class MetadataService {
   constructor(configuration: MetadataServiceConfiguration) {
     this.configuration = configuration;
   }
+}
 ```
 
 Then grab the functions that relate to handling metadata and convert them to methods of that class.
@@ -105,7 +107,14 @@ In some cases, decisions may be much more complex. It may be that whether to qua
 We can imagine a function like:
 
 ```typescript
-const shouldQuarantine(infected: boolean, size: number, format: FileFormat, objectionable: boolean, copyrighted: boolean, customerDetails: CustomerAgreement): boolean => {
+const shouldQuarantine = (
+    infected: boolean, 
+    size: number, 
+    format: FileFormat, 
+    objectionable: boolean, 
+    copyrighted: boolean, 
+    customerDetails: CustomerAgreement
+  ): boolean => {
   // LOTS OF COMPLEX RULES HERE
 }
 ```

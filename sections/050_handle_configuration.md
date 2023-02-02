@@ -6,8 +6,8 @@ In general, we prefer that - if a server isn't correctly configured - it fails s
 
 Additionally, having a component pull information directly from the environment means that:
 1. that dependency isn't explicit in the signature of the constructor or any methods;
-2. understand the totality of information required is difficult - it is diffused through the solution; and
-3. it is difficult to change the solution to source configuration from a different place - many bits of code would need to be changed.
+2. understanding the totality of information required is difficult - it is diffused through the solution; and
+3. it is difficult to change the solution to source the configuration from a different place - many bits of code would need to be changed.
 
 Let's start by creating a type that will represent a 'valid' configuration for the `EvidenceService`.
 
@@ -64,9 +64,9 @@ const evidenceService = new EvidenceService(evidenceServiceConfiguration);
 
 Comment out the `host` field in the configuration.
 
-1. Where do you see the compilation error reported? Where you create the configuration? Where it is passed into the constructor? Why?
-2. Is there a way to have the error reported at the line where the configuration is created?
-3. Do you think it is more useful to see the error where it is created or used?
+3. Where do you see the compilation error reported? Where you create the configuration? Where it is passed into the constructor? Why?
+4. Is there a way to have the error reported at the line where the configuration is created?
+5. Do you think it is more useful to see the error where it is created or used?
 
 Fix your code again and confirm in Tilt that the service has been redeployed. All usages of `process.env[...]` inside `evidenceService.ts` should now be redundant - the same information should be available in the configuration.
 
@@ -74,7 +74,7 @@ Replace those `process.env[...]` calls with the information that you have in the
 
 Once you've finished, check that there are no `process.env` calls left in the `EvidenceService` and that making requests to scan content still works.
 
-1. When passing configuration to the functions, did you choose to pass the entire configuration, a sub-object of the configuration or individual parameters? Why?
+6. When passing configuration to the functions, did you choose to pass the entire configuration, a sub-object of the configuration or individual parameters? Why?
 
 In general, we prefer to pass only what is necessary to functions. It may be convenient to 're-use' the definition of `EvidenceServiceConfiguration`, but it means that:
 

@@ -52,7 +52,7 @@ async fetchDetails(evidenceId: string): Promise<unknown | null> {
 
 1. Can you see where the `null` in the response to the `GET` request is coming from?
 
-Moving to the Route Handler, let's use the response from `+fetchDetails` to change the HTTP resposne we send.
+Moving to the Route Handler, let's use the response from `fetchDetails` to change the HTTP response we send.
 
 Firstly, let's get the machinery in place. Change the guts of the GET handler to:
 
@@ -109,7 +109,7 @@ Error: Failed to get project [MMAMOW2].
     [cause]: Error: "Basic authentication with passwords is deprecated.  For more information, see: https://developer.atlassian.com/cloud/confluence/deprecation-notice-basic-auth/\n"
 ```
 
-If you look at the type signature for `EvidenceService+uploadFile` you'll notice that we explicitly state the promise may return an instace of `Error` (Javascript's [standard error type](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)):
+If you look at the type signature for `EvidenceService+uploadFile` you'll notice that we explicitly state the promise may return an instance of `Error` (Javascript's [standard error type](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)):
 
 ```typescript
 Promise<{ evidence_id: string } | Error>
@@ -142,9 +142,9 @@ then make the request again.
 
 Send the request again and check the message in the response body.
 
-1. What was the message?
-2. Where can you see the `cause` of the error?
-3. Do you think that 'wrapping' the original error in this way provides additional, useful context?
+6. What was the message?
+7. Where can you see the `cause` of the error?
+8. Do you think that 'wrapping' the original error in this way provides additional, useful context?
 
 Fix the server's configuration and verify that everything works again.
 
@@ -162,7 +162,7 @@ The type that we use for that request is named `UploadRequest` and is defined in
 5. What part of the server is responsible for converting the HTTP request into an `UploadRequest`?
 6. Is it doing a good job?
 
-Let's think about what we would out of a good translation between the HTTP request and the domain-specific types.
+Let's think about what we would get out of a good translation between the HTTP request and the domain-specific types.
 
 * Good error messages to help us develop and operate.
 * Truthful types (e.g. not using `as`).
@@ -224,7 +224,7 @@ Switch the Route handler to use the method that will parse safely.
 const uploadRequest = UploadRequestSchema.safeParse(request);
 ```
 
-Your code should have errors now, because the type of `safeParse` has changed.
+Your code should have errors now, because in using `safeParse`, the type of `uploadRequest` has changed.
 
 Add the code to handle the error case and allow TypeScript's flow typing to narrow the type down to the success case:
 
@@ -242,7 +242,10 @@ Send your request again and check that the response contains some great error me
 
 9. Do you think it is appropriate to return this level of detail in a production system?
 10. Do you think that details of bad requests should be logged?
-11. The [Robustness Principle](https://en.wikipedia.org/wiki/Robustness_principle) states that we should be "be conservative in what you send, be liberal in what you accept". Do you think that we should try to 'repair' bad requests if we can?
+
+The [Robustness Principle](https://en.wikipedia.org/wiki/Robustness_principle) states that we should "be conservative in what you send, be liberal in what you accept". 
+
+11. Do you think that we should try to 'repair' bad requests if we can?
 
 ## Wrapping up
 

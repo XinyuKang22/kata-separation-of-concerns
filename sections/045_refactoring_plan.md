@@ -4,8 +4,8 @@ Now that we can see more clearly what `EvidenceService+uploadFile` is doing, let
 
 Let's decide this by thinking about:
 
-* whether the activity occur during creation of something (a class, service, etc) or when it is used (when invoking a method); and
-* what information should be hidden (and the contrary what should be visible) to other components.
+* whether the activity occurs during the creation of something (a class, service, etc.) or when it is used (when invoking a method); and
+* what information should be hidden (and contrarily, what should be visible) to other components.
 
 In particular, we want to avoid burdening clients (callers) of a function or method with having to provide too much information to get the output that they want. Likewise, we don't want to expose implementation specific information to callers.
 
@@ -21,16 +21,16 @@ Right now, the responsibilities are:
 | Read environment to set up dependencies | `EvidenceService` | Usage |
 | Parse incoming request from HTTP to domain-specific type | Route Handler (`server.ts`) | Usage |
 | Call virus scanning service | `EvidenceService` | Usage |
-| Interprets the results to decide what to do. | `EvidenceService` | Usage |
-| Uploads the content to S3. | `awsService.ts` | Usage |
-| Sometimes, updates MongoDBwith the metadata. | `EvidenceService` | Usage |
+| Interprets the results to decide what to do | `EvidenceService` | Usage |
+| Uploads the content to S3 | `awsService.ts` | Usage |
+| Sometimes, updates MongoDB with the metadata | `EvidenceService` | Usage |
 | Translate domain-specific response to HTTP response | Route Handler | Usage |
 
 Our exploratory testing has already identified the issues caused by the environment being read by the `EvidenceService` when it is being used. It would be much better if those errors occurred during startup.
 
 We could choose to do that in the `EvidenceService`'s constructor. That would mean that:
 
-* The caller of `EvidenceService+uploadFile` (the Route Handler) doesn't have to know of and provide that implementation specific configuration (e.g. should the Route Handler need to know that mongodb is used? Probably not.) ✅.
+* The caller of `EvidenceService+uploadFile` (the Route Handler) doesn't have to know of and provide that implementation specific configuration (e.g. should the Route Handler need to know that MongoDB is used? Probably not.) ✅.
 * The server will fail to start if we can't get the configuration that we need ✅.
 
 However, it also means that:
