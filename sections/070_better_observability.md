@@ -9,7 +9,7 @@ Right now, we can really only observe the solution in two ways:
 
 Currently, neither of these approaches provides useful information. The implementation only logs minimal information about the request it is handling and what happened with it. Responses for bad requests are similarly pretty poor. We *have* improved observability related to configuration handling slightly.
 
-1. Observability has a converse. What is it?
+1. Observability tells us how a system is behaving and why. There is another term that describes our abilitity to _change_ the behaviour of a system. What is it?
 2. How does our solution rate in that aspect?
 3. What changes could we make to improve its rating?
 
