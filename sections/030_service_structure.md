@@ -37,4 +37,4 @@ None of these things are performed well in the current solution. Even for this v
 For the rest of the kata, we are going to refactor the implementation to more closely adhere to our principles of clean code - particularly the Separation of Concerns.
 
 1. Can you think of any other key functions that the server performs?
-2. What types of service wouldn't receive an outside request to perform their work?
+2. The behaviour of most services is driven by an outside event (e.g. a HTTP request, a message being available on a queue).  What types of services aren't driven by outside events?

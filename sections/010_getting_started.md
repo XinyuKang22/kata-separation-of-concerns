@@ -36,7 +36,7 @@ You have the hostname and port from tilt, now we need to find out that path to w
 
 Open `node-services/file-handler/src/server/server.ts` and look for where routes are created (hint: look for `fastify.post` and `fastify.get`). Take a note of the path for the POST request.
 
-Now, using Postman or another tool, send a `POST` request to the host, port and path. The request body should look like:
+Now, using Postman or another tool, send a `POST` request to the host, port, and path.
 
 The request body should look like:
 

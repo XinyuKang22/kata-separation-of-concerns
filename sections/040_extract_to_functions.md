@@ -32,9 +32,7 @@ await uploadFileToS3(
     fileBuffer
 );
 
-return {
-    errors: ["File is infected"]
-}
+return new Error("File is infected");
 ```
 
 info a function named `handleInfectedFile`. Then do the same for the branch that handles an uninfected file, naming the function `handleCleanFile`.
@@ -71,7 +69,7 @@ Verify that `fileUpload` looks like:
 2. Does your answer to the first question depend on how much you can trust the functions that you just extracted to do what their name and type says?
 3. Is there anything else worth extracting from this method?
 4. At what points in this refactoring process did you send requests to the server to check it still worked?
-5. Did you get any other feedback that gave you confidence that the refactorings were correct?
+5. Did you get any other feedback that gave you confidence that the refactors were correct?
 
 ## Reviewing the refactor
 

@@ -8,42 +8,28 @@ To help people explore systems, we've noted some common scenarios to test as par
 
 ## Testing the server via HTTP interface
 
-Let's turn our mind to testing the `file-handler` server, starting with the simpler `GET` request handler.
+Let's turn our mind to testing the `file-handler` server.
 
-Send a `GET` request using `asdf` as the evidence id. 
-
+For each of the following `GET` and `POST` scenarios, send the request and answer these questions:
 1. What response do you receive?
 2. Is this an appropriate status code? If not, what would be?
 3. Do you think that this is a response that is helpful to someone working on the server?
 4. Do you think that it is an appropriate response to send when the server is running in a production environment?
 5. What is logged? Would that be helpful to a developer or operator of the server.
 
-Send a `GET` request using `123456789012345678901234` as the evidence id.
+`GET`:
+1. a request using `asdf` as the evidence id. 
+2. a request using `123456789012345678901234` as the evidence id.
 
-1. What response do you receive?
-2. Is this an appropriate status code? If not, what would be?
-3. Do you think that this is a response that is helpful to someone working on the server?
-4. Do you think that it is an appropriate response to send when the server is running in a production environment?
-5. What is logged? Would that be helpful to a developer or operator of the server.
-
-Let's now try the `POST` request.
-
-Send requests that contain:
+`POST`:
 1. a body that does not contain JSON.
 2. a body that contains JSON, but does not include the `base64_data` property.
 3. a valid body that contains a base64 encoded value of a [virus scanning test file](https://en.wikipedia.org/wiki/EICAR_test_file).
 
-For each scenario, answer:
-
-1. What response do you receive?
-2. Is this an appropriate status code? If not, what would be?
-3. Do you think that this is a response that is helpful to someone working on the server?
-4. Do you think that it is an appropriate response to send when the server is running in a production environment?
-5. What is logged? Would that be helpful to a developer or operator of the server.
 
 ## Testing the server via its environmental configuration
 
-As well as the data that the caller provides via the HTTP API, the server makes us of environmental configuration.
+As well as the data that the caller provides via the HTTP API, the server makes use of environmental configuration.
 
 Open `helm/templates/nodes-services.yml` and look for the `env` stanza for the `file-handler`.
 
@@ -64,5 +50,4 @@ Make a well-formed `POST` request to upload some content.
 
 Put the `CLAMAV_HOST` environment variable back and verify that the server is working again.
 
-1. What are you general thoughts on the robustness of the server?
-2. What are the three changes you would make to the server?
+1. What are your general thoughts on the robustness of the server, in priority order?

@@ -55,18 +55,20 @@ For all these messages, we like to include some information that is useful for c
 
 ```typescript
 
+    log.info(`Scanning content [${inputParameters.filename}] with size [${inputParameters.base64_data.length}] for viruses...`);
 
-      log.info(`Scanning content [${inputParameters.filename}] with size [${inputParameters.base64_data.length}] for viruses...`);
+    const scanResults = ...;
 
-      const scanResults = ...;
-      if (scanResults.isInfected) {
-        log.warn(`Scanned content [${inputParameters.filename}] with size [${inputParameters.base64_data.length}] is infected, will quarantine.`);
-        return await ...;
-      } else {
-        log.info(`Scanned content [${inputParameters.filename}] with size [${inputParameters.base64_data.length}] is not infected, passing`);
-        return await handleCleanFile(s3Key, fileBuffer, inputParameters);
-      }
-    };
+    if (scanResults.isInfected) {
+      log.warn(`Scanned content [${inputParameters.filename}] with size [${inputParameters.base64_data.length}] is infected, will quarantine.`);
+      
+      return await ...;
+    } else {
+      log.info(`Scanned content [${inputParameters.filename}] with size [${inputParameters.base64_data.length}] is not infected, passing.`);
+      
+      return await handleCleanFile(s3Key, fileBuffer, inputParameters);
+    }
+
 ```
 
 Note that we've repeated information that you might assume is redundant (the name and size of the file) in the 'done' messages. Some people will argue that this is unnecessary because you can just look up the log for the first message. However, in practice:
@@ -82,7 +84,7 @@ Add the other messages that you think are appropriate to the services.
 
 Make a request with both clean and unclean files.
 
-1. What was logged for each request?
+4. What was logged for each request?
 
 ### Logging context
 
@@ -105,7 +107,7 @@ Run the requests again and look at the log messages.
 2. Are there any other bits of information in the request that would be useful context for all log messages?
 3. Can you see any potential pitfalls to including more information in the context?
 4. Do you think we should include the name and size in both the context and the message?
-5. By including more structured information, have started to emit Events as well as Logs? What is the difference?
+5. By including more structured information, have we started to emit Events as well as Logs? What is the difference?
 6. Would it be useful to include any structured information for particular log messages that we emit?
 
 ## Metrics
@@ -178,7 +180,7 @@ Make a few `POST` requests to scan content.
 
 We now have to decide how that counter will be incremented. We have a couple of options:
 
-* change the return type of `EvidenceService+fileUpload` to to have a flag that says whether the file was infected or not and increment the counter from the route handler; or
+* change the return type of `EvidenceService+fileUpload` to have a flag that says whether the file was infected or not and increment the counter from the route handler; or
 * somehow get the counter into `EvidenceService+fileUpload` and increment it from there.
 
 As we consider the job of fastify to be *only* dealing with HTTP and handing off to the service as soon as possible, we can rule out the first option. Futhermore, that option would also mean that, for each metric we want to collect, we have to somehow expose information back to the route handler.
@@ -240,7 +242,7 @@ Update the constructor for `EvidenceService` to accept a new parameter:
 incrementCleanFilesCounter: () => void
 ```
 
-and satisfy it in the Asssembler with:
+and satisfy it in the Assembler with:
 
 ```typescript
 const evidenceService = new EvidenceService(
