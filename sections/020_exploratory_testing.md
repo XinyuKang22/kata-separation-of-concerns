@@ -50,5 +50,4 @@ Make a well-formed `POST` request to upload some content.
 
 Put the `CLAMAV_HOST` environment variable back and verify that the server is working again.
 
-1. What are your general thoughts on the robustness of the server?
-2. What are at least three changes you would make to the server?
+1. What are your general thoughts on the robustness of the server, in priority order?
