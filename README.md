@@ -15,6 +15,8 @@ At the end of the kata, the student can:
 2. A kubernetes cluster. You can use the one built into docker.
 3. [Tilt](https://docs.tilt.dev/install.html)
 4. A tool to make http requests like [httpie](https://httpie.io/), curl, [Postman](https://www.postman.com/downloads/) or [Insomnia](https://insomnia.rest/).
+5. [Helm](https://helm.sh/docs/intro/install/)
+6. [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#debian-stable)
 
 This repository includes a Postman collection (see `/testing`), so using Postman is probably the path of least resistance.
 
