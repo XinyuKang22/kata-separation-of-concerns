@@ -1,15 +1,9 @@
-import { MongoClient, ObjectId } from "mongodb";
+import { MongoClient } from "mongodb";
 import { UploadRequest } from "../types";
 
 export type MetadataServiceConfiguration = {
-    mongo: {
-        username: string,
-        password: string,
-      },
-    s3: {
-        bucket_quarantine: string,
-        bucket_scanned: string,
-      }
+    username: string,
+    password: string,
 };
 
 export class MetadataService {
@@ -21,9 +15,9 @@ export class MetadataService {
   }
 
   async storeMetadataInMongo(inputParameters: UploadRequest["body"]["input"]["data"], s3Key:string) {
-    const encodedMongoUsername = encodeURIComponent(this.configuration.mongo.username);
+    const encodedMongoUsername = encodeURIComponent(this.configuration.username);
   
-    const encodedMongoPassword = encodeURIComponent(this.configuration.mongo.password);
+    const encodedMongoPassword = encodeURIComponent(this.configuration.password);
     
     const mongoConnectionUri = `mongodb://${encodedMongoUsername}:${encodedMongoPassword}@mongo:27017`;
   

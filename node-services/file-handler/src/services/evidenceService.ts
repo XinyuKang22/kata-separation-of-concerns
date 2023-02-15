@@ -6,16 +6,12 @@ import { chainableError, uploadFileToS3 } from ".";
 import { UploadRequest } from "../types";
 import NodeClam from "clamscan";
 import { MongoClient, ObjectId } from "mongodb";
-import { MetadataService } from "./MetadataService";
+import { MetadataService, MetadataServiceConfiguration } from "./MetadataService";
 
 export type EvidenceServiceConfiguration = {
   clamAv: {
     host: string;
     port: string;
-  },
-  mongo: {
-    username: string,
-    password: string,
   },
   s3: {
     bucket_quarantine: string,
@@ -29,9 +25,9 @@ export class EvidenceService {
   readonly configuration: EvidenceServiceConfiguration;
   readonly metaDataService: MetadataService;
 
-  constructor(configuration: EvidenceServiceConfiguration, metaDataService: MetadataService) {
+  constructor(configuration: EvidenceServiceConfiguration, metaDataServiceConfiguration: MetadataServiceConfiguration) {
     this.configuration = configuration;
-    this.metaDataService = metaDataService;
+    this.metaDataService = new MetadataService(metaDataServiceConfiguration);
   }
 
   /**
@@ -57,14 +53,14 @@ export class EvidenceService {
       if (scanResults.isInfected) {
         return await handleInfectedFile(this.configuration.s3, s3Key, fileBuffer);
       } else {
-        return await handleCleanFile(this.configuration.s3, this.configuration.mongo, inputParameters, s3Key, fileBuffer);
+        return await handleCleanFile(this.metaDataService, this.configuration.s3, inputParameters, s3Key, fileBuffer);
       }
     };
 
   async fetchDetails(evidenceId: string) {
-    const encodedMongoUsername = encodeURIComponent(this.configuration.mongo.username);
+    const encodedMongoUsername = encodeURIComponent(this.metaDataService.configuration.username);
 
-    const encodedMongoPassword = encodeURIComponent(this.configuration.mongo.password);
+    const encodedMongoPassword = encodeURIComponent(this.metaDataService.configuration.password);
     
     const mongoConnectionUri = `mongodb://${encodedMongoUsername}:${encodedMongoPassword}@mongo:27017`;
 
@@ -95,7 +91,9 @@ async function scanContentForViruses(configClamAv: { host: any; port: any; }, fi
   return scanResults;
 }
 
-async function handleInfectedFile(configS3: { bucket_quarantine: any; bucket_scanned?: string; }, s3Key:string, fileBuffer:Buffer) {
+async function handleInfectedFile(configS3: { bucket_quarantine: any; bucket_scanned?: string; }
+  , s3Key:string
+  , fileBuffer:Buffer) {
   await uploadFileToS3(
     configS3.bucket_quarantine,
     s3Key,
@@ -105,14 +103,16 @@ async function handleInfectedFile(configS3: { bucket_quarantine: any; bucket_sca
   return new Error("File is infected");
 }
 
-async function handleCleanFile(configS3: { bucket_quarantine?: string; bucket_scanned: any; }, configMongo: { username: string; password: string; }, inputParameters: UploadRequest["body"]["input"]["data"], s3Key:string, fileBuffer:Buffer) {
+async function handleCleanFile(metaDataService: MetadataService, configS3: { bucket_quarantine?: string; bucket_scanned: any; }
+  , inputParameters: UploadRequest["body"]["input"]["data"]
+  , s3Key:string, fileBuffer:Buffer) {
   await uploadFileToS3(
     configS3.bucket_scanned,
     s3Key,
     fileBuffer
   );
 
-  const doc = await storeMetadataInMongo(configMongo, inputParameters, s3Key);
+  const doc = await metaDataService.storeMetadataInMongo(inputParameters, s3Key);
 
   return { evidence_id: doc.insertedId.toString() };
 }
