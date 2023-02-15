@@ -1,18 +1,13 @@
-import { Readable } from "stream";
 import { v4 as uuidv4 } from "uuid";
 import http from "http";
 import { FastifyBaseLogger } from "fastify";
 import { chainableError, uploadFileToS3 } from ".";
 import { UploadRequest } from "../types";
-import NodeClam from "clamscan";
 import { MongoClient, ObjectId } from "mongodb";
 import { MetadataService, MetadataServiceConfiguration } from "./metadataService";
+import { VirusScanningService, VirusScanningServiceConfiguration } from "./virusScanningService";
 
 export type EvidenceServiceConfiguration = {
-  clamAv: {
-    host: string;
-    port: string;
-  },
   s3: {
     bucket_quarantine: string,
     bucket_scanned: string,
@@ -24,10 +19,12 @@ export class EvidenceService {
 
   readonly configuration: EvidenceServiceConfiguration;
   readonly metaDataService: MetadataService;
+  readonly virusScanningService: VirusScanningService;
 
-  constructor(configuration: EvidenceServiceConfiguration, metaDataServiceConfiguration: MetadataServiceConfiguration) {
+  constructor(configuration: EvidenceServiceConfiguration, metaDataServiceConfiguration: MetadataServiceConfiguration, virusScanningServiceConfiguration: VirusScanningServiceConfiguration) {
     this.configuration = configuration;
     this.metaDataService = new MetadataService(metaDataServiceConfiguration);
+    this.virusScanningService = new VirusScanningService(virusScanningServiceConfiguration);
   }
 
   /**
@@ -49,7 +46,7 @@ export class EvidenceService {
       const uuid = uuidv4();
       const s3Key = await s3KeyForContent(uuid, inputParameters);
 
-      const scanResults = await scanContentForViruses(this.configuration.clamAv, fileBuffer);
+      const scanResults = await this.virusScanningService.scanContentForViruses(fileBuffer);
       if (scanResults.isInfected) {
         return await handleInfectedFile(this.configuration.s3, s3Key, fileBuffer);
       } else {
@@ -72,23 +69,6 @@ export class EvidenceService {
       _id: new ObjectId(evidenceId)
     });
   }
-}
-
-async function scanContentForViruses(configClamAv: { host: any; port: any; }, fileBuffer:Buffer) {
-  const tempOptions = { 
-    debugMode: false,
-    clamscan: {
-        active: false,
-    },
-    clamdscan: {
-        host: configClamAv.host,
-        port: configClamAv.port,
-        localFallback: false,
-    }
-  };
-  const clamScan = await new NodeClam().init(tempOptions);
-  const scanResults = await clamScan.scanStream(Readable.from(fileBuffer));
-  return scanResults;
 }
 
 async function handleInfectedFile(configS3: { bucket_quarantine: any; bucket_scanned?: string; }
