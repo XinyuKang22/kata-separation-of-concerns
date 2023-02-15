@@ -6,6 +6,7 @@ import { chainableError, uploadFileToS3 } from ".";
 import { UploadRequest } from "../types";
 import NodeClam from "clamscan";
 import { MongoClient, ObjectId } from "mongodb";
+import { MetadataService } from "./MetadataService";
 
 export type EvidenceServiceConfiguration = {
   clamAv: {
@@ -26,9 +27,11 @@ export type EvidenceServiceConfiguration = {
 export class EvidenceService {
 
   readonly configuration: EvidenceServiceConfiguration;
+  readonly metaDataService: MetadataService;
 
-  constructor(configuration: EvidenceServiceConfiguration) {
+  constructor(configuration: EvidenceServiceConfiguration, metaDataService: MetadataService) {
     this.configuration = configuration;
+    this.metaDataService = metaDataService;
   }
 
   /**
@@ -112,28 +115,6 @@ async function handleCleanFile(configS3: { bucket_quarantine?: string; bucket_sc
   const doc = await storeMetadataInMongo(configMongo, inputParameters, s3Key);
 
   return { evidence_id: doc.insertedId.toString() };
-}
-
-async function storeMetadataInMongo(configMongon: { username: string | number | boolean; password: string | number | boolean; }, inputParameters: UploadRequest["body"]["input"]["data"], s3Key:string) {
-  const encodedMongoUsername = encodeURIComponent(configMongon.username);
-
-  const encodedMongoPassword = encodeURIComponent(configMongon.password);
-  
-  const mongoConnectionUri = `mongodb://${encodedMongoUsername}:${encodedMongoPassword}@mongo:27017`;
-
-  const client = new MongoClient(mongoConnectionUri);
-
-  await client.db("admin").command({ping: 1});
-
-  const collection = await client.db("default").collection("default");
-
-  const doc = await collection.insertOne({
-    ...inputParameters,
-    s3Key,
-    infected: false
-  });
-
-  return doc;
 }
 
 async function s3KeyForContent(uuid: string, inputParameters: UploadRequest["body"]["input"]["data"]) {
