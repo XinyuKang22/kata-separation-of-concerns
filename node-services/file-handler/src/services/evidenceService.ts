@@ -6,7 +6,7 @@ import { chainableError, uploadFileToS3 } from ".";
 import { UploadRequest } from "../types";
 import NodeClam from "clamscan";
 import { MongoClient, ObjectId } from "mongodb";
-import { MetadataService, MetadataServiceConfiguration } from "./MetadataService";
+import { MetadataService, MetadataServiceConfiguration } from "./metadataService";
 
 export type EvidenceServiceConfiguration = {
   clamAv: {

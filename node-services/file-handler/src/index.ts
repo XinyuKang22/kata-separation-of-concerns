@@ -2,7 +2,7 @@ import {
   EvidenceService, EvidenceServiceConfiguration
 } from "./services";
 import { buildFastifyRoutes, buildFastifyServer, startServer } from "./server";
-import { MetadataServiceConfiguration } from "./services/MetadataService";
+import { MetadataServiceConfiguration } from "./services/metadataService";
 
 const requiredEnvironment = (name: string): string => {
   const value = process.env[name];
