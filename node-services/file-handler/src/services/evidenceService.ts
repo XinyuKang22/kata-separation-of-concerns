@@ -7,7 +7,29 @@ import { UploadRequest } from "../types";
 import NodeClam from "clamscan";
 import { MongoClient, ObjectId } from "mongodb";
 
+export type EvidenceServiceConfiguration = {
+  clamAv: {
+    host: string;
+    port: string;
+  },
+  mongo: {
+    username: string,
+    password: string,
+  },
+  s3: {
+    bucket_quarantine: string,
+    bucket_scanned: string,
+  }
+  // FIXME add other configuration
+};
+
 export class EvidenceService {
+
+  readonly configuration: EvidenceServiceConfiguration;
+
+  constructor(configuration: EvidenceServiceConfiguration) {
+    this.configuration = configuration;
+  }
 
   /**
    * Given a file and its required fields this scans the file using clamAV,
@@ -26,73 +48,20 @@ export class EvidenceService {
       const fileBuffer = Buffer.from(inputParameters.base64_data, "base64");
 
       const uuid = uuidv4();
-      const currentDate = new Date();
-      const dateString =
-        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        currentDate.getFullYear() +
-        "/" +
-        (currentDate.getMonth() + 1) +
-        "/" +
-        currentDate.getDate();
-      const s3Key = dateString + "/" + uuid + "/" + inputParameters.filename;
+      const s3Key = await s3KeyForContent(uuid, inputParameters);
 
-      const tempOptions = { 
-        debugMode: false,
-        clamscan: {
-          active: false,
-        },
-        clamdscan: {
-          host: process.env["CLAMAV_HOST"],
-          port: parseInt(process.env["CLAMAV_PORT"] || ""),
-          localFallback: false,
-        }
-        };
-      const clamScan = await new NodeClam().init(tempOptions);
-
-      const scanResults = await clamScan.scanStream(Readable.from(fileBuffer));
+      const scanResults = await scanContentForViruses(this.configuration.clamAv, fileBuffer);
       if (scanResults.isInfected) {
-
-        await uploadFileToS3(
-          process.env["QUARANTINE_BUCKET"] || "",
-          s3Key,
-          fileBuffer
-        );
-
-        return new Error("File is infected");
+        return await handleInfectedFile(this.configuration.s3, s3Key, fileBuffer);
       } else {
-    
-        await uploadFileToS3(
-          process.env["SCANNED_BUCKET"] || "",
-          s3Key,
-          fileBuffer
-        );
-
-        const encodedMongoUsername = encodeURIComponent(process.env["MONGO_INITDB_ROOT_USERNAME"] || "");
-
-        const encodedMongoPassword = encodeURIComponent(process.env["MONGO_INITDB_ROOT_PASSWORD"] || "");
-        
-        const mongoConnectionUri = `mongodb://${encodedMongoUsername}:${encodedMongoPassword}@mongo:27017`;
-
-        const client = new MongoClient(mongoConnectionUri);
-
-        await client.db("admin").command({ping: 1});
-
-        const collection = await client.db("default").collection("default");
-        
-        const doc = await collection.insertOne({
-          ...inputParameters,
-          s3Key,
-          infected: false
-        });
-
-        return { evidence_id: doc.insertedId.toString() };
+        return await handleCleanFile(this.configuration.s3, this.configuration.mongo, inputParameters, s3Key, fileBuffer);
       }
     };
 
   async fetchDetails(evidenceId: string) {
-    const encodedMongoUsername = encodeURIComponent(process.env["MONGO_INITDB_ROOT_USERNAME"] || "");
+    const encodedMongoUsername = encodeURIComponent(this.configuration.mongo.username);
 
-    const encodedMongoPassword = encodeURIComponent(process.env["MONGO_INITDB_ROOT_PASSWORD"] || "");
+    const encodedMongoPassword = encodeURIComponent(this.configuration.mongo.password);
     
     const mongoConnectionUri = `mongodb://${encodedMongoUsername}:${encodedMongoPassword}@mongo:27017`;
 
@@ -104,4 +73,78 @@ export class EvidenceService {
       _id: new ObjectId(evidenceId)
     });
   }
+}
+
+async function scanContentForViruses(configClamAv: { host: any; port: any; }, fileBuffer:Buffer) {
+  const tempOptions = { 
+    debugMode: false,
+    clamscan: {
+        active: false,
+    },
+    clamdscan: {
+        host: configClamAv.host,
+        port: configClamAv.port,
+        localFallback: false,
+    }
+  };
+  const clamScan = await new NodeClam().init(tempOptions);
+  const scanResults = await clamScan.scanStream(Readable.from(fileBuffer));
+  return scanResults;
+}
+
+async function handleInfectedFile(configS3: { bucket_quarantine: any; bucket_scanned?: string; }, s3Key:string, fileBuffer:Buffer) {
+  await uploadFileToS3(
+    configS3.bucket_quarantine,
+    s3Key,
+    fileBuffer
+  );
+  
+  return new Error("File is infected");
+}
+
+async function handleCleanFile(configS3: { bucket_quarantine?: string; bucket_scanned: any; }, configMongo: { username: string; password: string; }, inputParameters: UploadRequest["body"]["input"]["data"], s3Key:string, fileBuffer:Buffer) {
+  await uploadFileToS3(
+    configS3.bucket_scanned,
+    s3Key,
+    fileBuffer
+  );
+
+  const doc = await storeMetadataInMongo(configMongo, inputParameters, s3Key);
+
+  return { evidence_id: doc.insertedId.toString() };
+}
+
+async function storeMetadataInMongo(configMongon: { username: string | number | boolean; password: string | number | boolean; }, inputParameters: UploadRequest["body"]["input"]["data"], s3Key:string) {
+  const encodedMongoUsername = encodeURIComponent(configMongon.username);
+
+  const encodedMongoPassword = encodeURIComponent(configMongon.password);
+  
+  const mongoConnectionUri = `mongodb://${encodedMongoUsername}:${encodedMongoPassword}@mongo:27017`;
+
+  const client = new MongoClient(mongoConnectionUri);
+
+  await client.db("admin").command({ping: 1});
+
+  const collection = await client.db("default").collection("default");
+
+  const doc = await collection.insertOne({
+    ...inputParameters,
+    s3Key,
+    infected: false
+  });
+
+  return doc;
+}
+
+async function s3KeyForContent(uuid: string, inputParameters: UploadRequest["body"]["input"]["data"]) {
+  const currentDate = new Date();
+  const dateString =
+  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+  currentDate.getFullYear() +
+        "/" +
+        (currentDate.getMonth() + 1) +
+        "/" +
+        currentDate.getDate();
+  const s3Key = dateString + "/" + uuid + "/" + inputParameters.filename;
+  return s3Key;
 }
