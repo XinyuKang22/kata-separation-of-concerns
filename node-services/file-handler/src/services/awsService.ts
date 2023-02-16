@@ -4,18 +4,7 @@ import {
   PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
 
-
-export type AwsServiceConfiguration = {
-  bucket_quarantine: string,
-  bucket_scanned: string,
-}
-
 export class AwsService {
-  readonly configuration: AwsServiceConfiguration;
-
-  constructor(configuration: AwsServiceConfiguration) {
-    this.configuration = configuration;
-  }
 
   /**
  * Uploads a file from a `Buffer` to S3.

@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import { UploadRequest } from "../types";
 
 export type MetadataServiceConfiguration = {
@@ -34,5 +34,21 @@ export class MetadataService {
     });
   
     return doc;
+  }
+
+  async fetchDetails(evidenceId: string) {
+    const encodedMongoUsername = encodeURIComponent(this.configuration.username);
+
+    const encodedMongoPassword = encodeURIComponent(this.configuration.password);
+
+    const mongoConnectionUri = `mongodb://${encodedMongoUsername}:${encodedMongoPassword}@mongo:27017`;
+
+    const client = new MongoClient(mongoConnectionUri);
+
+    const collection = client.db("default").collection("default");
+
+    return await collection.findOne({
+      _id: new ObjectId(evidenceId)
+    });
   }
 }

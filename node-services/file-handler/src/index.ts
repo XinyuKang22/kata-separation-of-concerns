@@ -1,5 +1,5 @@
 import { buildFastifyRoutes, buildFastifyServer, startServer } from "./server";
-import { AwsServiceConfiguration, MetadataServiceConfiguration, VirusScanningServiceConfiguration, EvidenceService } from "./services";
+import { EvidenceServiceConfiguration, MetadataServiceConfiguration, VirusScanningServiceConfiguration, EvidenceService } from "./services";
 
 const requiredEnvironment = (name: string): string => {
   const value = process.env[name];
@@ -9,7 +9,7 @@ const requiredEnvironment = (name: string): string => {
   return value;
 }
 
-const awsServiceConfiguration: AwsServiceConfiguration = {
+const evidenceServiceConfiguration: EvidenceServiceConfiguration = {
   bucket_quarantine: requiredEnvironment("QUARANTINE_BUCKET"),
   bucket_scanned: requiredEnvironment("SCANNED_BUCKET"),
 }
@@ -29,7 +29,7 @@ buildFastifyServer(
   parseInt(requiredEnvironment("MAXIMUM_FILE_UPLOAD_SIZE")),
 ).
 then((fastify) => {
-  const evidenceService = new EvidenceService(awsServiceConfiguration, metaDataServiceConfiguration, virusScanningServiceConfiguration);
+  const evidenceService = new EvidenceService(evidenceServiceConfiguration, metaDataServiceConfiguration, virusScanningServiceConfiguration);
   buildFastifyRoutes(fastify, evidenceService);
   return fastify;
 }).

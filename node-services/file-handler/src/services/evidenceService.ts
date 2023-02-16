@@ -2,17 +2,23 @@ import { v4 as uuidv4 } from "uuid";
 import http from "http";
 import { FastifyBaseLogger } from "fastify";
 import { UploadRequest } from "../types";
-import { MongoClient, ObjectId } from "mongodb";
-import { AwsService, AwsServiceConfiguration, MetadataService, MetadataServiceConfiguration, VirusScanningService, VirusScanningServiceConfiguration } from ".";
+import { AwsService, MetadataService, MetadataServiceConfiguration, VirusScanningService, VirusScanningServiceConfiguration } from ".";
+
+export type EvidenceServiceConfiguration = {
+  bucket_quarantine: string,
+  bucket_scanned: string,
+}
 
 export class EvidenceService {
 
+  readonly configuration: EvidenceServiceConfiguration;
   readonly awsService: AwsService;
   readonly metaDataService: MetadataService;
   readonly virusScanningService: VirusScanningService;
 
-  constructor(awsServiceConfiguration: AwsServiceConfiguration, metaDataServiceConfiguration: MetadataServiceConfiguration, virusScanningServiceConfiguration: VirusScanningServiceConfiguration) {
-    this.awsService = new AwsService(awsServiceConfiguration);
+  constructor(evidenceServiceConfiguration: EvidenceServiceConfiguration, metaDataServiceConfiguration: MetadataServiceConfiguration, virusScanningServiceConfiguration: VirusScanningServiceConfiguration) {
+    this.configuration = evidenceServiceConfiguration;
+    this.awsService = new AwsService();
     this.metaDataService = new MetadataService(metaDataServiceConfiguration);
     this.virusScanningService = new VirusScanningService(virusScanningServiceConfiguration);
   }
@@ -31,39 +37,26 @@ export class EvidenceService {
     requestHeaders: http.IncomingHttpHeaders,
     log: FastifyBaseLogger
   ): Promise<{ evidence_id: string } | Error> {
-      const fileBuffer = Buffer.from(inputParameters.base64_data, "base64");
+    const fileBuffer = Buffer.from(inputParameters.base64_data, "base64");
 
-      const uuid = uuidv4();
-      const s3Key = await s3KeyForContent(uuid, inputParameters);
+    const s3Key = await s3KeyForContent(inputParameters);
 
-      const scanResults = await this.virusScanningService.scanContentForViruses(fileBuffer);
-      if (scanResults.isInfected) {
-        return await handleInfectedFile(this.awsService, s3Key, fileBuffer);
-      } else {
-        return await handleCleanFile(this.metaDataService, this.awsService, inputParameters, s3Key, fileBuffer);
-      }
-    };
+    const scanResults = await this.virusScanningService.scanContentForViruses(fileBuffer);
+    if (scanResults.isInfected) {
+      return await handleInfectedFile(this.awsService, this.configuration.bucket_quarantine, s3Key, fileBuffer);
+    } else {
+      return await handleCleanFile(inputParameters, this.metaDataService, this.awsService, this.configuration.bucket_quarantine, s3Key, fileBuffer);
+    }
+  };
 
   async fetchDetails(evidenceId: string) {
-    const encodedMongoUsername = encodeURIComponent(this.metaDataService.configuration.username);
-
-    const encodedMongoPassword = encodeURIComponent(this.metaDataService.configuration.password);
-    
-    const mongoConnectionUri = `mongodb://${encodedMongoUsername}:${encodedMongoPassword}@mongo:27017`;
-
-    const client = new MongoClient(mongoConnectionUri);
-
-    const collection = client.db("default").collection("default");
-
-    return await collection.findOne({
-      _id: new ObjectId(evidenceId)
-    });
+    this.metaDataService.fetchDetails(evidenceId);
   }
 }
 
-async function handleInfectedFile(awsService: AwsService, s3Key:string, fileBuffer:Buffer) {
+async function handleInfectedFile(awsService: AwsService, bucket_quarantine:string, s3Key:string, fileBuffer:Buffer) {
   await awsService.uploadFileToS3(
-    awsService.configuration.bucket_quarantine,
+    bucket_quarantine,
     s3Key,
     fileBuffer
   );
@@ -71,21 +64,19 @@ async function handleInfectedFile(awsService: AwsService, s3Key:string, fileBuff
   return new Error("File is infected");
 }
 
-async function handleCleanFile(metaDataService: MetadataService, awsService: AwsService
-  , inputParameters: UploadRequest["body"]["input"]["data"]
-  , s3Key:string, fileBuffer:Buffer) {
-  await awsService.uploadFileToS3(
-    awsService.configuration.bucket_scanned,
-    s3Key,
-    fileBuffer
-  );
+async function handleCleanFile(inputParameters: UploadRequest["body"]["input"]["data"]
+, metaDataService: MetadataService, awsService: AwsService
+, bucket_scanned: string, s3Key: string, fileBuffer: Buffer) 
+{
+  await awsService.uploadFileToS3(bucket_scanned, s3Key, fileBuffer);
 
   const doc = await metaDataService.storeMetadataInMongo(inputParameters, s3Key);
 
   return { evidence_id: doc.insertedId.toString() };
 }
 
-async function s3KeyForContent(uuid: string, inputParameters: UploadRequest["body"]["input"]["data"]) {
+async function s3KeyForContent(inputParameters: UploadRequest["body"]["input"]["data"]) {
+  const uuid = uuidv4();
   const currentDate = new Date();
   const dateString =
   // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
