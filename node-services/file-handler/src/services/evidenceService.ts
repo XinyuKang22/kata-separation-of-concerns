@@ -1,28 +1,18 @@
 import { v4 as uuidv4 } from "uuid";
 import http from "http";
 import { FastifyBaseLogger } from "fastify";
-import { chainableError, uploadFileToS3 } from ".";
 import { UploadRequest } from "../types";
 import { MongoClient, ObjectId } from "mongodb";
-import { MetadataService, MetadataServiceConfiguration } from "./metadataService";
-import { VirusScanningService, VirusScanningServiceConfiguration } from "./virusScanningService";
-
-export type EvidenceServiceConfiguration = {
-  s3: {
-    bucket_quarantine: string,
-    bucket_scanned: string,
-  }
-  // FIXME add other configuration
-};
+import { AwsService, AwsServiceConfiguration, MetadataService, MetadataServiceConfiguration, VirusScanningService, VirusScanningServiceConfiguration } from ".";
 
 export class EvidenceService {
 
-  readonly configuration: EvidenceServiceConfiguration;
+  readonly awsService: AwsService;
   readonly metaDataService: MetadataService;
   readonly virusScanningService: VirusScanningService;
 
-  constructor(configuration: EvidenceServiceConfiguration, metaDataServiceConfiguration: MetadataServiceConfiguration, virusScanningServiceConfiguration: VirusScanningServiceConfiguration) {
-    this.configuration = configuration;
+  constructor(awsServiceConfiguration: AwsServiceConfiguration, metaDataServiceConfiguration: MetadataServiceConfiguration, virusScanningServiceConfiguration: VirusScanningServiceConfiguration) {
+    this.awsService = new AwsService(awsServiceConfiguration);
     this.metaDataService = new MetadataService(metaDataServiceConfiguration);
     this.virusScanningService = new VirusScanningService(virusScanningServiceConfiguration);
   }
@@ -48,9 +38,9 @@ export class EvidenceService {
 
       const scanResults = await this.virusScanningService.scanContentForViruses(fileBuffer);
       if (scanResults.isInfected) {
-        return await handleInfectedFile(this.configuration.s3, s3Key, fileBuffer);
+        return await handleInfectedFile(this.awsService, s3Key, fileBuffer);
       } else {
-        return await handleCleanFile(this.metaDataService, this.configuration.s3, inputParameters, s3Key, fileBuffer);
+        return await handleCleanFile(this.metaDataService, this.awsService, inputParameters, s3Key, fileBuffer);
       }
     };
 
@@ -71,11 +61,9 @@ export class EvidenceService {
   }
 }
 
-async function handleInfectedFile(configS3: { bucket_quarantine: any; bucket_scanned?: string; }
-  , s3Key:string
-  , fileBuffer:Buffer) {
-  await uploadFileToS3(
-    configS3.bucket_quarantine,
+async function handleInfectedFile(awsService: AwsService, s3Key:string, fileBuffer:Buffer) {
+  await awsService.uploadFileToS3(
+    awsService.configuration.bucket_quarantine,
     s3Key,
     fileBuffer
   );
@@ -83,11 +71,11 @@ async function handleInfectedFile(configS3: { bucket_quarantine: any; bucket_sca
   return new Error("File is infected");
 }
 
-async function handleCleanFile(metaDataService: MetadataService, configS3: { bucket_quarantine?: string; bucket_scanned: any; }
+async function handleCleanFile(metaDataService: MetadataService, awsService: AwsService
   , inputParameters: UploadRequest["body"]["input"]["data"]
   , s3Key:string, fileBuffer:Buffer) {
-  await uploadFileToS3(
-    configS3.bucket_scanned,
+  await awsService.uploadFileToS3(
+    awsService.configuration.bucket_scanned,
     s3Key,
     fileBuffer
   );

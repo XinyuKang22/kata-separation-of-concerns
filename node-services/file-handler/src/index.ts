@@ -1,9 +1,5 @@
-import {
-  EvidenceService, EvidenceServiceConfiguration
-} from "./services";
 import { buildFastifyRoutes, buildFastifyServer, startServer } from "./server";
-import { MetadataServiceConfiguration } from "./services/metadataService";
-import { VirusScanningServiceConfiguration } from "./services/virusScanningService";
+import { AwsServiceConfiguration, MetadataServiceConfiguration, VirusScanningServiceConfiguration, EvidenceService } from "./services";
 
 const requiredEnvironment = (name: string): string => {
   const value = process.env[name];
@@ -13,12 +9,9 @@ const requiredEnvironment = (name: string): string => {
   return value;
 }
 
-const evidenceServiceConfiguration: EvidenceServiceConfiguration = {
-  s3: {
-    bucket_quarantine: requiredEnvironment("QUARANTINE_BUCKET"),
-    bucket_scanned: requiredEnvironment("SCANNED_BUCKET"),
-  }
-  // FIXME other setup goes here.
+const awsServiceConfiguration: AwsServiceConfiguration = {
+  bucket_quarantine: requiredEnvironment("QUARANTINE_BUCKET"),
+  bucket_scanned: requiredEnvironment("SCANNED_BUCKET"),
 }
 
 const metaDataServiceConfiguration: MetadataServiceConfiguration = {
@@ -28,7 +21,7 @@ const metaDataServiceConfiguration: MetadataServiceConfiguration = {
 
 const virusScanningServiceConfiguration: VirusScanningServiceConfiguration = {
   host: requiredEnvironment("CLAMAV_HOST"),
-  port: requiredEnvironment("CLAMAV_PORT"),
+  port: Number(requiredEnvironment("CLAMAV_PORT")),
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -36,7 +29,7 @@ buildFastifyServer(
   parseInt(requiredEnvironment("MAXIMUM_FILE_UPLOAD_SIZE")),
 ).
 then((fastify) => {
-  const evidenceService = new EvidenceService(evidenceServiceConfiguration, metaDataServiceConfiguration, virusScanningServiceConfiguration);
+  const evidenceService = new EvidenceService(awsServiceConfiguration, metaDataServiceConfiguration, virusScanningServiceConfiguration);
   buildFastifyRoutes(fastify, evidenceService);
   return fastify;
 }).

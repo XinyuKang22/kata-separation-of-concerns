@@ -3,7 +3,7 @@ import { Readable } from "stream";
 
 export type VirusScanningServiceConfiguration =  {
     host: string;
-    port: string;
+    port: number;
 }
 
 export class VirusScanningService {
