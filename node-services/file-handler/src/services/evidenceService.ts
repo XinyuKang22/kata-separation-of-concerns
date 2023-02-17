@@ -15,10 +15,20 @@ export class EvidenceService {
   readonly awsService: AwsService;
   readonly metaDataService: MetadataService;
   readonly virusScanningService: VirusScanningService;
+  readonly incrementCleanFilesCounter: () => void;
+  readonly incrementInfectedFilesCounter: () => void;
 
-  constructor(evidenceServiceConfiguration: EvidenceServiceConfiguration, metaDataServiceConfiguration: MetadataServiceConfiguration, virusScanningServiceConfiguration: VirusScanningServiceConfiguration) {
+  constructor(incrementCleanFilesCounter: () => void, 
+  incrementInfectedFilesCounter: () => void,
+  addValueToContentSizeHistogram: (value: number) => void,
+  evidenceServiceConfiguration: EvidenceServiceConfiguration, 
+  metaDataServiceConfiguration: MetadataServiceConfiguration, 
+  virusScanningServiceConfiguration: VirusScanningServiceConfiguration) 
+  {
+    this.incrementCleanFilesCounter = incrementCleanFilesCounter;
+    this.incrementInfectedFilesCounter = incrementInfectedFilesCounter;
     this.configuration = evidenceServiceConfiguration;
-    this.awsService = new AwsService();
+    this.awsService = new AwsService(addValueToContentSizeHistogram);
     this.metaDataService = new MetadataService(metaDataServiceConfiguration);
     this.virusScanningService = new VirusScanningService(virusScanningServiceConfiguration);
   }
@@ -37,14 +47,22 @@ export class EvidenceService {
     requestHeaders: http.IncomingHttpHeaders,
     log: FastifyBaseLogger
   ): Promise<{ evidence_id: string } | Error> {
+    log.info("Creating file buffer...")
     const fileBuffer = Buffer.from(inputParameters.base64_data, "base64");
 
+    log.info("Generating S3 key for the content...")
     const s3Key = await s3KeyForContent(inputParameters);
 
+    log.info(`Scanning content [${inputParameters.filename}] with size [${inputParameters.base64_data.length}] for viruses...`);
     const scanResults = await this.virusScanningService.scanContentForViruses(fileBuffer);
+
     if (scanResults.isInfected) {
+      log.warn(`Scanned content [${inputParameters.filename}] with size [${inputParameters.base64_data.length}] is infected, will quarantine.`);
+      this.incrementInfectedFilesCounter();
       return await handleInfectedFile(this.awsService, this.configuration.bucket_quarantine, s3Key, fileBuffer);
     } else {
+      log.info(`Scanned content [${inputParameters.filename}] with size [${inputParameters.base64_data.length}] is not infected, passing.`);
+      this.incrementCleanFilesCounter();
       return await handleCleanFile(inputParameters, this.metaDataService, this.awsService, this.configuration.bucket_quarantine, s3Key, fileBuffer);
     }
   };

@@ -6,6 +6,22 @@ import {
 
 export class AwsService {
 
+  readonly client: any;
+  readonly addValueToContentSizeHistogram;
+
+  constructor (addValueToContentSizeHistogram: (value: number) => void) {
+    this.addValueToContentSizeHistogram = addValueToContentSizeHistogram;
+    this.client = new S3Client({
+      region: process.env["AWS_DEFAULT_REGION"],
+      forcePathStyle: true,
+      endpoint: "http://localstack-service:4566",
+      credentials: {
+        accessKeyId: "test",
+        secretAccessKey: "test",
+      },
+    });
+  }
+
   /**
  * Uploads a file from a `Buffer` to S3.
  *
@@ -20,16 +36,8 @@ export class AwsService {
       Key: key,
       Body: file,
     };
-    const client = new S3Client({
-      region: process.env["AWS_DEFAULT_REGION"],
-      forcePathStyle: true,
-      endpoint: "http://localstack-service:4566",
-      credentials: {
-        accessKeyId: "test",
-        secretAccessKey: "test",
-      },
-    });
     const putObjectCommand = new PutObjectCommand(s3Command);
-    await client.send(putObjectCommand);
+    this.addValueToContentSizeHistogram(file.length);
+    await this.client.send(putObjectCommand);
   }
 }

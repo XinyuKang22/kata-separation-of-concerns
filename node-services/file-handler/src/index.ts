@@ -28,9 +28,39 @@ const virusScanningServiceConfiguration: VirusScanningServiceConfiguration = {
 buildFastifyServer(
   parseInt(requiredEnvironment("MAXIMUM_FILE_UPLOAD_SIZE")),
 ).
-then((fastify) => {
-  const evidenceService = new EvidenceService(evidenceServiceConfiguration, metaDataServiceConfiguration, virusScanningServiceConfiguration);
-  buildFastifyRoutes(fastify, evidenceService);
-  return fastify;
+then((fastifyWithMetrics) => {
+
+  const numberOfCleanFilesScanned = new fastifyWithMetrics.metrics.client.Counter(
+    {
+      name: "clean_files_count",
+      help: "The number of clean files that have been scanned by the service."
+    }
+  );
+
+  const numberOfInfectedFilesDetected = new fastifyWithMetrics.metrics.client.Counter(
+    {
+      name: "infected_files_count",
+      help: "The number of infected files that have been deteced by the service."
+    }
+  )
+
+  const sizeOfContentUploadedToS3 = new fastifyWithMetrics.metrics.client.Histogram(
+    {
+      name: "content_size_uploaded_to_S3",
+      help: "The histogram that track the size of content uploaded to S3",
+      buckets: [5, 15, 50, 100, 500],
+    }
+  )
+
+  const evidenceService = new EvidenceService(
+    () => numberOfCleanFilesScanned.inc(), 
+    () => numberOfInfectedFilesDetected.inc(), 
+    (value: number) => sizeOfContentUploadedToS3.observe(value),
+    evidenceServiceConfiguration, 
+    metaDataServiceConfiguration, 
+    virusScanningServiceConfiguration);
+
+  buildFastifyRoutes(fastifyWithMetrics, evidenceService);
+  return fastifyWithMetrics;
 }).
 then((fastify) => startServer(fastify));
