@@ -5,7 +5,7 @@ import Fastify, {
 } from "fastify";
 import metricsPlugin, { IFastifyMetrics } from "fastify-metrics";
 import { EvidenceService } from "../services";
-import { UploadRequest } from "../types";
+import { UploadRequestSchema } from "../types/codecs";
 
 export const buildFastifyServer = async (
   maximum_upload_size: number
@@ -58,15 +58,20 @@ export const buildFastifyRoutes = (
       | undefined
     > => {
 
-      const uploadRequest = request as UploadRequest;
-
+      const uploadRequest = UploadRequestSchema.safeParse(request);
+      if (!uploadRequest.success) {
+        return await reply.status(400).send({
+          ...uploadRequest.error,
+          message: "Failed to parse upload request",
+        });
+      }
       const requestLogger = logger.child({
-        contentName: uploadRequest.body.input.data.filename,
-        contentSize: uploadRequest.body.input.data.base64_data.length,
+        contentName: uploadRequest.data.body.input.data.filename,
+        contentSize: uploadRequest.data.body.input.data.base64_data.length,
       });
 
       const processResult = await evidenceService.fileUpload(
-        uploadRequest.body.input.data,
+        uploadRequest.data.body.input.data,
         request.headers,
         requestLogger
       );
@@ -84,7 +89,13 @@ export const buildFastifyRoutes = (
     "/evidence/:evidenceId", async (request, reply) => {
       const { evidenceId } = request.params as { evidenceId: string};
 
-      return await evidenceService.fetchDetails(evidenceId);
+      const result = await evidenceService.fetchDetails(evidenceId);
+
+      return result === null ?
+        await reply.status(404).send({
+          message: `No metadata for [${evidenceId}].`
+        }) :
+        result;
     }
   )
 

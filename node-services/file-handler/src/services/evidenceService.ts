@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import http from "http";
 import { FastifyBaseLogger } from "fastify";
 import { UploadRequest } from "../types";
-import { AwsService, MetadataService, MetadataServiceConfiguration, VirusScanningService, VirusScanningServiceConfiguration } from ".";
+import { AwsService, chainableError, MetadataService, MetadataServiceConfiguration, VirusScanningService, VirusScanningServiceConfiguration } from ".";
 
 export type EvidenceServiceConfiguration = {
   bucket_quarantine: string,
@@ -67,8 +67,14 @@ export class EvidenceService {
     }
   };
 
-  async fetchDetails(evidenceId: string) {
-    this.metaDataService.fetchDetails(evidenceId);
+  async fetchDetails(evidenceId: string): Promise<unknown | null | Error> {
+    try {
+      return this.metaDataService.fetchDetails(evidenceId);
+    } catch (e: unknown) {
+      return new Error(`Failed to fetch details of [${evidenceId}].`, 
+        { cause: chainableError(e) }
+      );
+    } 
   }
 }
 

@@ -1,15 +1,4 @@
-export interface UploadRequest {
-  body: {
-    action: {
-      name: string;
-    };
-    input: {
-      data: {
-        filename: string;
-        base64_data: string;
-        name: string;
-        description: string;
-      };
-    };
-  };
-}
+import { z } from "zod";
+import { UploadRequestSchema } from "./codecs";
+
+export type UploadRequest = z.infer<typeof UploadRequestSchema>;
